@@ -1,13 +1,14 @@
 {
     "id" : "Signalling",
     "version" : "0.1.0",
-    "displayName" : "Signalling framework",
     "author" : "MarcinSc marcins78@gmail.com",
+    "displayName" : "Signalling framework",
     "description" : "Mod containing block that allow to send signals to other blocks",
     "dependencies" : [
         {
             "id" : "BlockNetwork",
             "minVersion" : "0.1.0"
         }
-    ]
+    ],
+    "isServerSideOnly" : false
 }
