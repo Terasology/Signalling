@@ -4,22 +4,32 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import org.terasology.blockNetwork.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.terasology.blockNetwork.BlockNetwork;
+import org.terasology.blockNetwork.ImmutableBlockLocation;
+import org.terasology.blockNetwork.Network;
+import org.terasology.blockNetwork.NetworkNode;
+import org.terasology.blockNetwork.NetworkTopologyListener;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.entity.lifecycleEvents.*;
-import org.terasology.entitySystem.systems.In;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.Vector3i;
-import org.terasology.signalling.components.*;
+import org.terasology.registry.In;
+import org.terasology.signalling.components.SignalConductorComponent;
+import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
+import org.terasology.signalling.components.SignalConsumerComponent;
+import org.terasology.signalling.components.SignalConsumerStatusComponent;
+import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.BlockEntityRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.BeforeDeactivateBlocks;
 import org.terasology.world.block.BlockComponent;
@@ -102,8 +112,9 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
             lastUpdate = worldTime;
 
             // Mark all networks affected by the producer signal change
-            for (NetworkNode producerChanges : producersSignalsChanged)
+            for (NetworkNode producerChanges : producersSignalsChanged) {
                 networksToRecalculate.addAll(producerNetworks.get(producerChanges));
+            }
 
             Set<NetworkNode> consumersToEvaluate = Sets.newHashSet();
 
@@ -183,8 +194,8 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
         byte withSignal = 0;
         if (networkSignals != null) {
             for (NetworkSignals networkSignal : networkSignals) {
-                withoutSignal|=networkSignal.sidesWithoutSignal;
-                withSignal|=networkSignal.sidesWithSignal;
+                withoutSignal |= networkSignal.sidesWithoutSignal;
+                withSignal |= networkSignal.sidesWithSignal;
             }
         }
         if (advancedStatusComponent.sidesWithoutSignals != withoutSignal
@@ -205,8 +216,9 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
     }
 
     private boolean hasSignalForXor(Collection<NetworkSignals> networkSignals) {
-        if (networkSignals == null)
+        if (networkSignals == null) {
             return false;
+        }
         boolean connected = false;
         for (NetworkSignals networkSignal : networkSignals) {
             if (SideBitFlag.getSides(networkSignal.sidesWithSignal).size() > 1) {
@@ -226,19 +238,25 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
     }
 
     private boolean hasSignalForAnd(Collection<NetworkSignals> networkSignals) {
-        if (networkSignals == null)
+        if (networkSignals == null) {
             return false;
+        }
         for (NetworkSignals networkSignal : networkSignals) {
-            if (networkSignal.sidesWithoutSignal > 0) return false;
+            if (networkSignal.sidesWithoutSignal > 0) {
+                return false;
+            }
         }
         return true;
     }
 
     private boolean hasSignalForOr(Collection<NetworkSignals> networkSignals) {
-        if (networkSignals == null)
+        if (networkSignals == null) {
             return false;
+        }
         for (NetworkSignals networkSignal : networkSignals) {
-            if (networkSignal.sidesWithSignal > 0) return true;
+            if (networkSignal.sidesWithSignal > 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -250,8 +268,9 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
         for (NetworkNode producer : producers) {
             if (CONSUMER_CAN_POWER_ITSELF || !producer.location.equals(consumerNode.location)) {
                 final int signalStrength = producerSignalStrengths.get(producer);
-                if (signalStrength == -1)
+                if (signalStrength == -1) {
                     return new NetworkSignals(network.getLeafSidesInNetwork(consumerNode), (byte) 0);
+                }
             }
         }
 
@@ -272,8 +291,9 @@ public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyList
         for (NetworkNode producer : producers) {
             if (CONSUMER_CAN_POWER_ITSELF || !producer.location.equals(consumerNode.location)) {
                 final int signalStrength = producerSignalStrengths.get(producer);
-                if (network.isInDistanceWithSide(signalStrength, producer, consumerNode, sideInNetwork))
+                if (network.isInDistanceWithSide(signalStrength, producer, consumerNode, sideInNetwork)) {
                     return true;
+                }
             }
         }
         return false;

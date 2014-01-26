@@ -1,5 +1,6 @@
 package org.terasology.signalling.componentSystem;
 
+import com.google.common.collect.Sets;
 import gnu.trove.iterator.TObjectLongIterator;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
@@ -10,34 +11,40 @@ import org.terasology.engine.CoreRegistry;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.entity.lifecycleEvents.*;
-import org.terasology.entitySystem.systems.In;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
-import org.terasology.signalling.components.*;
+import org.terasology.math.Vector3i;
+import org.terasology.registry.In;
+import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
+import org.terasology.signalling.components.SignalConsumerStatusComponent;
+import org.terasology.signalling.components.SignalDelayedActionComponent;
+import org.terasology.signalling.components.SignalProducerComponent;
+import org.terasology.signalling.components.SignalProducerModifiedComponent;
+import org.terasology.signalling.components.SignalTimeDelayComponent;
+import org.terasology.signalling.components.SignalTimeDelayModifiedComponent;
 import org.terasology.signalling.gui.SetSignalDelayEvent;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.block.BlockManager;
-import org.terasology.math.Vector3i;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.world.block.family.BlockFamily;
 
 import javax.vecmath.Vector3f;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.PriorityQueue;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -313,8 +320,9 @@ public class SignalSwitchBehaviourSystem implements UpdateSubscriberSystem {
 
     private void signalTransformerActivated(EntityRef entity, SignalProducerComponent producerComponent) {
         int result = producerComponent.signalStrength + 1;
-        if (result == 11)
+        if (result == 11) {
             result = 0;
+        }
         if (result > 0) {
             startProducingSignal(entity, result);
         } else {
@@ -467,14 +475,21 @@ public class SignalSwitchBehaviourSystem implements UpdateSubscriberSystem {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             BlockAtLocationDelayedAction that = (BlockAtLocationDelayedAction) o;
 
-            if (executeTime != that.executeTime) return false;
-            if (blockLocation != null ? !blockLocation.equals(that.blockLocation) : that.blockLocation != null)
+            if (executeTime != that.executeTime) {
                 return false;
+            }
+            if (blockLocation != null ? !blockLocation.equals(that.blockLocation) : that.blockLocation != null) {
+                return false;
+            }
 
             return true;
         }
