@@ -17,6 +17,7 @@ import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateCompon
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
-public class SignalSystem implements UpdateSubscriberSystem, NetworkTopologyListener {
+public class SignalSystem extends BaseComponentSystem implements UpdateSubscriberSystem, NetworkTopologyListener {
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
 
     @In

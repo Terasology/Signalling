@@ -15,6 +15,7 @@ import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateCompon
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
@@ -50,7 +51,7 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class SignalSwitchBehaviourSystem implements UpdateSubscriberSystem {
+public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
 
     public static final int GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL = 500;
@@ -253,11 +254,6 @@ public class SignalSwitchBehaviourSystem implements UpdateSubscriberSystem {
         signalOffDelayGate = blockManager.getBlockFamily("signalling:SignalOffDelayGate");
 
         signalSetResetGate = blockManager.getBlockFamily("signalling:SignalSetResetGate");
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 
     @ReceiveEvent(components = {BlockComponent.class, SignalTimeDelayComponent.class})

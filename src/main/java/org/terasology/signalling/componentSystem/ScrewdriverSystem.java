@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.ComponentSystem;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
@@ -26,7 +26,7 @@ import org.terasology.world.block.family.SideDefinedBlockFamily;
 import java.util.EnumMap;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class ScrewdriverSystem implements ComponentSystem {
+public class ScrewdriverSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(ScrewdriverSystem.class);
     @In
     private WorldProvider worldProvider;
@@ -43,10 +43,6 @@ public class ScrewdriverSystem implements ComponentSystem {
         sideOrder.put(Side.RIGHT, Side.TOP);
         sideOrder.put(Side.TOP, Side.BOTTOM);
         sideOrder.put(Side.BOTTOM, Side.FRONT);
-    }
-
-    @Override
-    public void shutdown() {
     }
 
     @ReceiveEvent(components = {ScrewdriverComponent.class})
