@@ -8,10 +8,10 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
-import org.terasology.logic.manager.GUIManager;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.registry.In;
+import org.terasology.rendering.nui.NUIManager;
 import org.terasology.signalling.components.SignalTimeDelayComponent;
-import org.terasology.signalling.gui.UIDelayConfiguration;
+import org.terasology.signalling.nui.DelayConfigurationScreen;
 import org.terasology.world.block.BlockComponent;
 
 /**
@@ -20,15 +20,13 @@ import org.terasology.world.block.BlockComponent;
 @RegisterSystem(RegisterMode.CLIENT)
 public class SignallingConfigurationSystem extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(SignallingConfigurationSystem.class);
-
-    @Override
-    public void initialise() {
-        CoreRegistry.get(GUIManager.class).registerWindow("signalling:delayConfiguration", UIDelayConfiguration.class);
-    }
+    @In
+    private NUIManager nuiManager;
 
     @ReceiveEvent(components = {BlockComponent.class, SignalTimeDelayComponent.class})
     public void openDelayConfiguration(ActivateEvent event, EntityRef entity) {
-        UIDelayConfiguration delayConfigurationScreen = (UIDelayConfiguration) CoreRegistry.get(GUIManager.class).openWindow("signalling:delayConfiguration");
-        delayConfigurationScreen.attachToEntity("Delay configuration", entity);
+        nuiManager.toggleScreen("signalling:delayConfigurationScreen");
+        DelayConfigurationScreen layer = (DelayConfigurationScreen)nuiManager.getScreen("signalling:delayConfigurationScreen");
+        layer.attachToEntity("Delay configuration", entity);
     }
 }

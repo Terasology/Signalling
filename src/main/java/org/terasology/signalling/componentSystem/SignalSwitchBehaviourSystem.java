@@ -33,7 +33,7 @@ import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.signalling.components.SignalProducerModifiedComponent;
 import org.terasology.signalling.components.SignalTimeDelayComponent;
 import org.terasology.signalling.components.SignalTimeDelayModifiedComponent;
-import org.terasology.signalling.gui.SetSignalDelayEvent;
+import org.terasology.signalling.nui.SetSignalDelayEvent;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;

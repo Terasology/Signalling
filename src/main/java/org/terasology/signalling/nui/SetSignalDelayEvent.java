@@ -1,4 +1,4 @@
-package org.terasology.signalling.gui;
+package org.terasology.signalling.nui;
 
 import org.terasology.network.NetworkEvent;
 import org.terasology.network.ServerEvent;
