@@ -1,0 +1,6 @@
+{
+    "displayName": "Signal Transformer",
+    "entity" : {
+        "prefab" : "signalling:SignalTransformer"
+    }
+}
