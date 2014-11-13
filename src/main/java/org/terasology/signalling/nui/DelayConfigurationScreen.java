@@ -62,7 +62,9 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
         SignalTimeDelayComponent timeDelay = entity.getComponent(SignalTimeDelayComponent.class);
         if (timeDelay != null) {
             timeMs = timeDelay.delaySetting;
-            logger.info("timeMs " + timeMs);
+            if (logger.isInfoEnabled()) {
+                logger.info("timeMs " + timeMs);
+            }
             time.setText(String.valueOf(timeMs) + "ms");
         }
     }

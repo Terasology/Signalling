@@ -174,7 +174,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private boolean processOutputForNormalGate(EntityRef blockEntity) {
         boolean hasSignal = blockEntity.getComponent(SignalConsumerStatusComponent.class).hasSignal;
-        logger.debug("Processing gate, hasSignal=" + hasSignal);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Processing gate, hasSignal=" + hasSignal);
+        }
         if (hasSignal) {
             return startProducingSignal(blockEntity, -1);
         } else {
@@ -426,12 +428,16 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     private void signalChangedForNormalGate(EntityRef entity, SignalConsumerStatusComponent consumerStatusComponent) {
-        logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
+        }
         delayGateSignalChangeIfNeeded(entity);
     }
 
     private void signalChangedForNotGate(EntityRef entity, SignalConsumerStatusComponent consumerStatusComponent) {
-        logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
+        }
         delayGateSignalChangeIfNeeded(entity);
     }
 

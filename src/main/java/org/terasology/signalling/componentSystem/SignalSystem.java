@@ -217,7 +217,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         if (consumerStatusComponent.hasSignal != result) {
             consumerStatusComponent.hasSignal = result;
             entity.saveComponent(consumerStatusComponent);
-            logger.debug("Consumer has signal: " + result);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Consumer has signal: " + result);
+            }
         }
     }
 
@@ -487,7 +489,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
     @ReceiveEvent(components = {SignalProducerComponent.class})
     public void producerUpdated(OnChangedComponent event, EntityRef block) {
-        logger.debug("Producer updated: " + block.getParentPrefab());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Producer updated: " + block.getParentPrefab());
+        }
         if (block.hasComponent(BlockComponent.class)) {
             Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
             ImmutableBlockLocation blockLocation = new ImmutableBlockLocation(location);
