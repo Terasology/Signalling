@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.terasology.signalling.componentSystem;
 
 import com.google.common.collect.HashMultimap;
@@ -43,6 +58,8 @@ import java.util.Set;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class SignalSystem extends BaseComponentSystem implements UpdateSubscriberSystem, NetworkTopologyListener {
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
+    private static final long PROCESSING_MINIMUM_INTERVAL = 0;
+    private static final boolean CONSUMER_CAN_POWER_ITSELF = true;
 
     @In
     private Time time;
@@ -74,15 +91,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     private Set<NetworkNode> consumersToRecalculate = Sets.newHashSet();
     private Set<NetworkNode> producersSignalsChanged = Sets.newHashSet();
 
-    private class NetworkSignals {
-        private byte sidesWithSignal;
-        private byte sidesWithoutSignal;
-
-        private NetworkSignals(byte sidesWithSignal, byte sidesWithoutSignal) {
-            this.sidesWithSignal = sidesWithSignal;
-            this.sidesWithoutSignal = sidesWithoutSignal;
-        }
-    }
+    private long lastUpdate;
 
     @Override
     public void initialise() {
@@ -102,10 +111,6 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         signalConductors = null;
     }
 
-    private long lastUpdate;
-    private static final long PROCESSING_MINIMUM_INTERVAL = 0;
-    private static final boolean CONSUMER_CAN_POWER_ITSELF = true;
-
     @Override
     public void update(float delta) {
         long worldTime = time.getGameTimeInMs();
@@ -121,12 +126,12 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
             for (Network network : networksToRecalculate) {
                 if (signalNetwork.isNetworkActive(network)) {
-                    Collection<NetworkNode> consumersInNetwork = this.consumersInNetwork.get(network);
-                    for (NetworkNode consumerLocation : consumersInNetwork) {
+                    Collection<NetworkNode> consumersInRecalculatedNetwork = this.consumersInNetwork.get(network);
+                    for (NetworkNode consumerLocation : consumersInRecalculatedNetwork) {
                         NetworkSignals consumerSignalInNetwork = getConsumerSignalInNetwork(network, consumerLocation);
                         consumerSignalInNetworks.get(consumerLocation).put(network, consumerSignalInNetwork);
                     }
-                    consumersToEvaluate.addAll(consumersInNetwork);
+                    consumersToEvaluate.addAll(consumersInRecalculatedNetwork);
                 }
             }
 
@@ -606,4 +611,13 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         consumerSignalInNetworks.remove(consumerNode);
     }
 
+    private final class NetworkSignals {
+        private byte sidesWithSignal;
+        private byte sidesWithoutSignal;
+
+        private NetworkSignals(byte sidesWithSignal, byte sidesWithoutSignal) {
+            this.sidesWithSignal = sidesWithSignal;
+            this.sidesWithoutSignal = sidesWithoutSignal;
+        }
+    }
 }

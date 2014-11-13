@@ -30,13 +30,14 @@ import org.terasology.signalling.components.SignalTimeDelayComponent;
  * Created by adeon on 03.06.14.
  */
 public class DelayConfigurationScreen extends CoreScreenLayer {
+    private static final long MINIMUM_DELAY = 500;
+    private static final long DELAY_STEP = 100;
 
     private EntityRef blockEntity;
 
-    private static final long MINIMUM_DELAY=500;
-    private static final long DELAY_STEP = 100;
     private long timeMs;
     private final Logger logger = LoggerFactory.getLogger(DelayConfigurationScreen.class);
+
     @Override
     protected void initialise() {
         WidgetUtil.trySubscribe(this, "delay-decrease", new ActivateEventListener() {
@@ -52,12 +53,13 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
             }
         });
     }
-    public void attachToEntity(String title, EntityRef blockEntity) {
-        this.blockEntity = blockEntity;
+
+    public void attachToEntity(String title, EntityRef entity) {
+        this.blockEntity = entity;
         UIText time = find("delay-value", UIText.class);
         UILabel label = find("delay-title", UILabel.class);
         label.setText(title);
-        SignalTimeDelayComponent timeDelay = blockEntity.getComponent(SignalTimeDelayComponent.class);
+        SignalTimeDelayComponent timeDelay = entity.getComponent(SignalTimeDelayComponent.class);
         if (timeDelay != null) {
             timeMs = timeDelay.delaySetting;
             logger.info("timeMs " + timeMs);
@@ -68,7 +70,7 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
     private void setTime(long timeToSet) {
         timeMs = timeToSet;
         UIText time = find("delay-value", UIText.class);
-        time.setText(String.valueOf(timeMs)+"ms");
+        time.setText(String.valueOf(timeMs) + "ms");
         this.blockEntity.send(new SetSignalDelayEvent(timeMs));
     }
 
@@ -77,6 +79,6 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
     }
 
     private void decrease() {
-        setTime(Math.max(MINIMUM_DELAY, timeMs-DELAY_STEP));
+        setTime(Math.max(MINIMUM_DELAY, timeMs - DELAY_STEP));
     }
 }

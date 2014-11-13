@@ -1,6 +1,6 @@
 {
     "displayName": "Signal Transformer",
-    "entity" : {
-        "prefab" : "signalling:SignalTransformer"
+    "entity": {
+        "prefab": "signalling:SignalTransformer"
     }
 }

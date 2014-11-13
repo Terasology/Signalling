@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.terasology.signalling.componentSystem;
 
 import com.google.common.collect.Sets;
@@ -52,11 +67,12 @@ import java.util.Set;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
-    private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
-
     public static final int GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL = 500;
     public static final int NOT_LOADED_BLOCK_RETRY_DELAY = 500;
     public static final int BUTTON_PRESS_TIME = 500;
+
+    private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
+    private static final long SIGNAL_CLEANUP_INTERVAL = 10000;
 
     @In
     private Time time;
@@ -71,6 +87,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private PriorityQueue<BlockAtLocationDelayedAction> delayedActions = new PriorityQueue<BlockAtLocationDelayedAction>(11, new ExecutionTimeOrdering());
 
     private TObjectLongMap<ImmutableBlockLocation> gateLastSignalChangeTime = new TObjectLongHashMap<>();
+
+    private long lastSignalCleanupExecuteTime;
 
     private Block lampTurnedOff;
     private Block lampTurnedOn;
@@ -97,9 +115,6 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         deleteOldSignalChangesForGates();
     }
 
-    private static final long SIGNAL_CLEANUP_INTERVAL = 10000;
-    private long lastSignalCleanupExecuteTime;
-
     private void deleteOldSignalChangesForGates() {
         long worldTime = time.getGameTimeInMs();
         if (lastSignalCleanupExecuteTime + SIGNAL_CLEANUP_INTERVAL < worldTime) {
@@ -116,11 +131,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private void handleDelayedActionsEvents() {
         long worldTime = time.getGameTimeInMs();
-        BlockAtLocationDelayedAction action;
-        while ((action = delayedActions.peek()) != null
-                && action.executeTime <= worldTime) {
-            action = delayedActions.poll();
-
+        BlockAtLocationDelayedAction action = delayedActions.poll();
+        while (action != null && action.executeTime <= worldTime) {
             final Vector3i actionLocation = action.blockLocation.toVector3i();
             if (worldProvider.isBlockRelevant(actionLocation)) {
                 final Block block = worldProvider.getBlock(actionLocation);
@@ -155,6 +167,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                 action.executeTime += NOT_LOADED_BLOCK_RETRY_DELAY;
                 delayedActions.add(action);
             }
+
+            action = delayedActions.poll();
         }
     }
 
@@ -460,7 +474,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         return false;
     }
 
-    private class BlockAtLocationDelayedAction {
+    private final class BlockAtLocationDelayedAction {
         private long executeTime;
         private ImmutableBlockLocation blockLocation;
 

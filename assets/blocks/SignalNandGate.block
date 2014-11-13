@@ -2,10 +2,10 @@
     "displayName": "Signal NAND Gate",
     "rotation": "allSides",
     "tiles": {
-        "all":"signalling:SignalNandGate",
-        "front":"signalling:SignalSwitch"
+        "all": "signalling:SignalNandGate",
+        "front": "signalling:SignalSwitch"
     },
-    "entity" : {
-        "prefab" : "signalling:SignalNandGate"
+    "entity": {
+        "prefab": "signalling:SignalNandGate"
     }
 }
