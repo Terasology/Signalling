@@ -15,8 +15,6 @@
  */
 package org.terasology.signalling.nui;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.rendering.nui.UIWidget;
@@ -36,7 +34,6 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
     private EntityRef blockEntity;
 
     private long timeMs;
-    private final Logger logger = LoggerFactory.getLogger(DelayConfigurationScreen.class);
 
     @Override
     protected void initialise() {
@@ -62,9 +59,6 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
         SignalTimeDelayComponent timeDelay = entity.getComponent(SignalTimeDelayComponent.class);
         if (timeDelay != null) {
             timeMs = timeDelay.delaySetting;
-            if (logger.isInfoEnabled()) {
-                logger.info("timeMs " + timeMs);
-            }
             time.setText(String.valueOf(timeMs) + "ms");
         }
     }

@@ -376,14 +376,11 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             Block block = worldProvider.getBlock(blockLocation);
             BlockFamily blockFamily = block.getBlockFamily();
             if (block == lampTurnedOff && consumerStatusComponent.hasSignal) {
-                logger.debug("Lamp turning on");
                 worldProvider.setBlock(blockLocation, lampTurnedOn);
             } else if (block == lampTurnedOn && !consumerStatusComponent.hasSignal) {
-                logger.debug("Lamp turning off");
                 worldProvider.setBlock(blockLocation, lampTurnedOff);
             } else if (blockFamily == signalOrGate || blockFamily == signalAndGate
                     || blockFamily == signalXorGate) {
-                logger.debug("Signal changed for gate");
                 signalChangedForNormalGate(entity, consumerStatusComponent);
             } else if (blockFamily == signalNandGate) {
                 signalChangedForNotGate(entity, consumerStatusComponent);
@@ -448,7 +445,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             SignalDelayedActionComponent delayedAction = new SignalDelayedActionComponent();
             long whenToLookAt;
             final ImmutableBlockLocation location = new ImmutableBlockLocation(entity.getComponent(BlockComponent.class).getPosition());
-            if (gateLastSignalChangeTime.containsKey(location)) {
+            if (gateLastSignalChangeTime.containsKey(location)) {Remove the "requiredPermissions"
                 whenToLookAt = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL;
             } else {
                 whenToLookAt = time.getGameTimeInMs();

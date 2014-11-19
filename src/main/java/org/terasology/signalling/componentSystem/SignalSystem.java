@@ -100,7 +100,6 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         signalProducers = Maps.newHashMap();
         signalConsumers = Maps.newHashMap();
         signalConductors = Maps.newHashMap();
-        logger.info("Initialized SignalSystem");
     }
 
     @Override
@@ -313,13 +312,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
     @Override
     public void networkingNodesAdded(Network network, Set<NetworkNode> networkingNodes) {
-        logger.debug("Cable added to network");
         networksToRecalculate.add(network);
     }
 
     @Override
     public void networkingNodesRemoved(Network network, Set<NetworkNode> networkingNodes) {
-        logger.debug("Cable removed from network");
         networksToRecalculate.add(network);
     }
 
@@ -327,12 +324,10 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     public void leafNodesAdded(Network network, Set<NetworkNode> leafNodes) {
         for (NetworkNode modifiedLeafNode : leafNodes) {
             if (((SignalNetworkNode) modifiedLeafNode).getType() == SignalNetworkNode.Type.PRODUCER) {
-                logger.debug("Producer added to network");
                 networksToRecalculate.add(network);
                 producerNetworks.put(modifiedLeafNode, network);
                 producersInNetwork.put(network, modifiedLeafNode);
             } else {
-                logger.debug("Consumer added to network");
                 consumersToRecalculate.add(modifiedLeafNode);
                 consumerNetworks.put(modifiedLeafNode, network);
                 consumersInNetwork.put(network, modifiedLeafNode);
@@ -344,12 +339,10 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     public void leafNodesRemoved(Network network, Set<NetworkNode> leafNodes) {
         for (NetworkNode modifiedLeafNode : leafNodes) {
             if (((SignalNetworkNode) modifiedLeafNode).getType() == SignalNetworkNode.Type.PRODUCER) {
-                logger.debug("Producer removed from network");
                 networksToRecalculate.add(network);
                 producerNetworks.remove(modifiedLeafNode, network);
                 producersInNetwork.remove(network, modifiedLeafNode);
             } else {
-                logger.debug("Consumer removed from network");
                 consumersToRecalculate.add(modifiedLeafNode);
                 consumerNetworks.remove(modifiedLeafNode, network);
                 consumersInNetwork.remove(network, modifiedLeafNode);
