@@ -445,7 +445,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             SignalDelayedActionComponent delayedAction = new SignalDelayedActionComponent();
             long whenToLookAt;
             final ImmutableBlockLocation location = new ImmutableBlockLocation(entity.getComponent(BlockComponent.class).getPosition());
-            if (gateLastSignalChangeTime.containsKey(location)) {Remove the "requiredPermissions"
+            if (gateLastSignalChangeTime.containsKey(location)) {
                 whenToLookAt = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL;
             } else {
                 whenToLookAt = time.getGameTimeInMs();
