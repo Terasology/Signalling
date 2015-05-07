@@ -8,6 +8,11 @@
         {
             "id" : "BlockNetwork",
             "minVersion" : "0.1.0"
+        },
+        {
+            "id" : "ModularComputers",
+            "minVersion" : "0.1.0",
+            "optional": true
         }
     ],
     "isServerSideOnly" : false
