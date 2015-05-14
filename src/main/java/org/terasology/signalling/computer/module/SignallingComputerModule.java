@@ -26,6 +26,9 @@ public class SignallingComputerModule extends DefaultComputerModule {
     public SignallingComputerModule(String moduleType, String moduleName) {
         super(moduleType, moduleName);
         this.moduleType = moduleType;
+
+        addMethod("readSignal", new ReadSignalMethod("readSignal"));
+        addMethod("emitSignal", new EmitSignalMethod("emitSignal"));
     }
 
     @Override

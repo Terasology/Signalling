@@ -58,7 +58,7 @@ import java.util.Set;
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class SignalSystem extends BaseComponentSystem implements UpdateSubscriberSystem, NetworkTopologyListener {
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
-    private static final long PROCESSING_MINIMUM_INTERVAL = 0;
+    public static final long PROCESSING_MINIMUM_INTERVAL = 0;
     private static final boolean CONSUMER_CAN_POWER_ITSELF = true;
 
     @In

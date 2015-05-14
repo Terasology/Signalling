@@ -85,8 +85,16 @@ public class SignalModuleServerSystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
-    public void computerMovedCopyProduceSettings(BlockTransitionDuringMoveEvent event, EntityRef entity, SignalProducerComponent producer) {
+    public void computerMovedCopyProduceSettings(BlockTransitionDuringMoveEvent event, EntityRef entity, SignalProducerComponent producer, SignalConsumerComponent consumer) {
         EntityRef newEntity = event.getIntoEntity();
+
+        SignalConsumerComponent newConsumer = newEntity.getComponent(SignalConsumerComponent.class);
+
+        newConsumer.connectionSides = consumer.connectionSides;
+        newConsumer.mode = consumer.mode;
+
+        newEntity.saveComponent(newConsumer);
+
         SignalProducerComponent newProducer = newEntity.getComponent(SignalProducerComponent.class);
 
         newProducer.connectionSides = producer.connectionSides;
