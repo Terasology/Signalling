@@ -35,16 +35,17 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.common.ActivateEvent;
+import org.terasology.logic.delay.DelayManager;
+import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
-import org.terasology.math.SideBitFlag;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
+import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalConsumerStatusComponent;
-import org.terasology.signalling.components.SignalDelayedActionComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.signalling.components.SignalProducerModifiedComponent;
 import org.terasology.signalling.components.SignalTimeDelayComponent;
@@ -58,7 +59,6 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.family.BlockFamily;
 
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -68,8 +68,14 @@ import java.util.Set;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     public static final int GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL = 500;
-    public static final int NOT_LOADED_BLOCK_RETRY_DELAY = 500;
     public static final int BUTTON_PRESS_TIME = 500;
+
+    private static final String BUTTON_RELEASE_ID = "Signalling:ButtonRelease";
+    private static final String DELAYED_ON_GATE_ID = "Signalling:DelayedOnGate";
+    private static final String DELAYED_OFF_GATE_ID = "Signalling:DelayedOffGate";
+    private static final String NORMAL_GATE_ID = "Signalling:NormalGate";
+    private static final String REVERTED_GATE_ID = "Signalling:RevertedGate";
+    private static final String SET_RESET_GATE_ID = "Signalling:SetResetGate";
 
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
     private static final long SIGNAL_CLEANUP_INTERVAL = 10000;
@@ -82,9 +88,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private EntityManager entityManager;
     @In
     private BlockEntityRegistry blockEntityRegistry;
+    @In
+    private DelayManager delayManager;
 
     private Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
-    private PriorityQueue<BlockAtLocationDelayedAction> delayedActions = new PriorityQueue<BlockAtLocationDelayedAction>(11, new ExecutionTimeOrdering());
 
     private TObjectLongMap<ImmutableBlockLocation> gateLastSignalChangeTime = new TObjectLongHashMap<>();
 
@@ -111,8 +118,40 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     @Override
     public void update(float delta) {
         handlePressurePlateEvents();
-        handleDelayedActionsEvents();
         deleteOldSignalChangesForGates();
+    }
+
+    @ReceiveEvent
+    public void delayedTriggerOnProducer(DelayedActionTriggeredEvent event, EntityRef entity, SignalProducerComponent signalProducer) {
+        if (event.getActionId().equals(BUTTON_RELEASE_ID)) {
+            stopProducingSignal(entity);
+        }
+    }
+
+    @ReceiveEvent
+    public void delayedTriggerOnDelayedGate(DelayedActionTriggeredEvent event, EntityRef entity, SignalTimeDelayComponent signalTimeDelay) {
+        if (event.getActionId().equals(DELAYED_ON_GATE_ID)) {
+            startProducingSignal(entity, -1);
+        } else if (event.getActionId().equals(DELAYED_OFF_GATE_ID)) {
+            stopProducingSignal(entity);
+        }
+    }
+
+    @ReceiveEvent
+    public void delayedTriggerOnConsumer(DelayedActionTriggeredEvent event, EntityRef entity, SignalConsumerComponent signalConsumer, BlockComponent block) {
+        if (event.getActionId().equals(NORMAL_GATE_ID)) {
+            if (processOutputForNormalGate(entity)) {
+                gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+            }
+        } else if (event.getActionId().equals(REVERTED_GATE_ID)) {
+            if (processOutputForRevertedGate(entity)) {
+                gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+            }
+        } else if (event.getActionId().equals(SET_RESET_GATE_ID)) {
+            if (processOutputForSetResetGate(entity)) {
+                gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+            }
+        }
     }
 
     private void deleteOldSignalChangesForGates() {
@@ -126,49 +165,6 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                 }
             }
             lastSignalCleanupExecuteTime = worldTime;
-        }
-    }
-
-    private void handleDelayedActionsEvents() {
-        long worldTime = time.getGameTimeInMs();
-        BlockAtLocationDelayedAction action = delayedActions.poll();
-        while (action != null && action.executeTime <= worldTime) {
-            final Vector3i actionLocation = action.blockLocation.toVector3i();
-            if (worldProvider.isBlockRelevant(actionLocation)) {
-                final Block block = worldProvider.getBlock(actionLocation);
-                final BlockFamily blockFamily = block.getBlockFamily();
-
-                final EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(actionLocation);
-
-                if (blockFamily == signalOnDelayGate) {
-                    startProducingSignal(blockEntity, -1);
-                } else if (blockFamily == signalOffDelayGate) {
-                    stopProducingSignal(blockEntity);
-                } else if (blockFamily == signalOrGate || blockFamily == signalAndGate
-                        || blockFamily == signalXorGate) {
-                    if (processOutputForNormalGate(blockEntity)) {
-                        gateLastSignalChangeTime.put(new ImmutableBlockLocation(actionLocation), worldTime);
-                    }
-                } else if (blockFamily == signalNandGate) {
-                    if (processOutputForRevertedGate(blockEntity)) {
-                        gateLastSignalChangeTime.put(new ImmutableBlockLocation(actionLocation), worldTime);
-                    }
-                } else if (blockFamily == signalSetResetGate) {
-                    if (processOutputForSetResetGate(blockEntity)) {
-                        gateLastSignalChangeTime.put(new ImmutableBlockLocation(actionLocation), worldTime);
-                    }
-                } else if (block == signalButton) {
-                    stopProducingSignal(blockEntity);
-                }
-
-                blockEntity.removeComponent(SignalDelayedActionComponent.class);
-            } else {
-                // TODO Remove this workaround when BlockEntities will be stored with the chunk they belong to
-                action.executeTime += NOT_LOADED_BLOCK_RETRY_DELAY;
-                delayedActions.add(action);
-            }
-
-            action = delayedActions.poll();
         }
     }
 
@@ -195,13 +191,22 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private boolean processOutputForSetResetGate(EntityRef blockEntity) {
         SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent = blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
-        EnumSet<Side> signals = SideBitFlag.getSides(consumerAdvancedStatusComponent.sidesWithSignals);
+        Integer topSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.TOP.name());
+        Integer bottomSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.BOTTOM.name());
+
         SignalProducerComponent producerComponent = blockEntity.getComponent(SignalProducerComponent.class);
         int resultSignal = producerComponent.signalStrength;
-        if (signals.contains(Side.TOP) || signals.contains(Side.BOTTOM)) {
+        if ((topSignal != null && topSignal != 0) || (bottomSignal != null && bottomSignal != 0)) {
             resultSignal = 0;
-        } else if (signals.size() > 0) {
-            resultSignal = -1;
+        } else {
+            Integer leftSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.LEFT.name());
+            Integer rightSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.RIGHT.name());
+            Integer frontSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.FRONT.name());
+            Integer backSignal = consumerAdvancedStatusComponent.signalStrengths.get(Side.BACK.name());
+            if ((leftSignal != null && leftSignal != 0) || (rightSignal != null && rightSignal != 0)
+                    || (frontSignal != null && frontSignal != 0) || (backSignal != null && backSignal != 0)) {
+                resultSignal = -1;
+            }
         }
         if (producerComponent.signalStrength != resultSignal) {
             producerComponent.signalStrength = resultSignal;
@@ -309,16 +314,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         switchFlipped(-1, entity, producerComponent);
     }
 
-    private void signalButtonActivated(EntityRef block, SignalProducerComponent producerComponent) {
-        if (block.hasComponent(SignalDelayedActionComponent.class)) {
-            block.removeComponent(SignalDelayedActionComponent.class);
-        }
+    private void signalButtonActivated(EntityRef entity, SignalProducerComponent producerComponent) {
+        delayManager.addDelayedAction(entity, BUTTON_RELEASE_ID, BUTTON_PRESS_TIME);
 
-        SignalDelayedActionComponent actionComponent = new SignalDelayedActionComponent();
-        actionComponent.executeTime = time.getGameTimeInMs() + BUTTON_PRESS_TIME;
-        block.addComponent(actionComponent);
-
-        startProducingSignal(block, -1);
+        startProducingSignal(entity, -1);
     }
 
     private void switchFlipped(int onSignalStrength, EntityRef entity, SignalProducerComponent producerComponent) {
@@ -342,20 +341,6 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
-    @ReceiveEvent(components = {BlockComponent.class, SignalDelayedActionComponent.class})
-    public void addedDelayedAction(OnActivatedComponent event, EntityRef block) {
-        final Vector3i location = block.getComponent(BlockComponent.class).getPosition();
-        final long executeTime = block.getComponent(SignalDelayedActionComponent.class).executeTime;
-        delayedActions.add(new BlockAtLocationDelayedAction(location, executeTime));
-    }
-
-    @ReceiveEvent(components = {BlockComponent.class, SignalDelayedActionComponent.class})
-    public void removedDelayedAction(BeforeDeactivateComponent event, EntityRef block) {
-        final Vector3i location = block.getComponent(BlockComponent.class).getPosition();
-        final long executeTime = block.getComponent(SignalDelayedActionComponent.class).executeTime;
-        delayedActions.remove(new BlockAtLocationDelayedAction(location, executeTime));
-    }
-
     @ReceiveEvent(components = {SignalConsumerAdvancedStatusComponent.class})
     public void advancedConsumerModified(OnChangedComponent event, EntityRef entity) {
         if (entity.hasComponent(BlockComponent.class)) {
@@ -363,7 +348,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             Block block = worldProvider.getBlock(blockLocation);
             BlockFamily blockFamily = block.getBlockFamily();
             if (blockFamily == signalSetResetGate) {
-                delayGateSignalChangeIfNeeded(entity);
+                delayGateSignalChangeIfNeeded(entity, SET_RESET_GATE_ID);
             }
         }
     }
@@ -396,15 +381,13 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         SignalTimeDelayComponent delay = entity.getComponent(SignalTimeDelayComponent.class);
         if (consumerStatusComponent.hasSignal) {
             // Remove any signal-delayed actions on the entity and turn on signal from it, if it doesn't have any
-            if (entity.hasComponent(SignalDelayedActionComponent.class)) {
-                entity.removeComponent(SignalDelayedActionComponent.class);
+            if (delayManager.hasDelayedAction(entity, DELAYED_OFF_GATE_ID)) {
+                delayManager.cancelDelayedAction(entity, DELAYED_OFF_GATE_ID);
             }
             startProducingSignal(entity, -1);
         } else {
             // Schedule for the gate to be looked at when the time passes
-            SignalDelayedActionComponent delayedAction = new SignalDelayedActionComponent();
-            delayedAction.executeTime = time.getGameTimeInMs() + delay.delaySetting;
-            entity.addComponent(delayedAction);
+            delayManager.addDelayedAction(entity, DELAYED_OFF_GATE_ID, delay.delaySetting);
         }
     }
 
@@ -412,13 +395,11 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         SignalTimeDelayComponent delay = entity.getComponent(SignalTimeDelayComponent.class);
         if (consumerStatusComponent.hasSignal) {
             // Schedule for the gate to be looked at when the time passes
-            SignalDelayedActionComponent delayedAction = new SignalDelayedActionComponent();
-            delayedAction.executeTime = time.getGameTimeInMs() + delay.delaySetting;
-            entity.addComponent(delayedAction);
+            delayManager.addDelayedAction(entity, DELAYED_ON_GATE_ID, delay.delaySetting);
         } else {
             // Remove any signal-delayed actions on the entity and turn off signal from it, if it has any
-            if (entity.hasComponent(SignalDelayedActionComponent.class)) {
-                entity.removeComponent(SignalDelayedActionComponent.class);
+            if (delayManager.hasDelayedAction(entity, DELAYED_ON_GATE_ID)) {
+                delayManager.cancelDelayedAction(entity, DELAYED_ON_GATE_ID);
             }
             stopProducingSignal(entity);
         }
@@ -428,30 +409,28 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         if (logger.isDebugEnabled()) {
             logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
         }
-        delayGateSignalChangeIfNeeded(entity);
+        delayGateSignalChangeIfNeeded(entity, NORMAL_GATE_ID);
     }
 
     private void signalChangedForNotGate(EntityRef entity, SignalConsumerStatusComponent consumerStatusComponent) {
         if (logger.isDebugEnabled()) {
             logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
         }
-        delayGateSignalChangeIfNeeded(entity);
+        delayGateSignalChangeIfNeeded(entity, REVERTED_GATE_ID);
     }
 
-    private void delayGateSignalChangeIfNeeded(EntityRef entity) {
-        if (!entity.hasComponent(SignalDelayedActionComponent.class)) {
+    private void delayGateSignalChangeIfNeeded(EntityRef entity, String actionId) {
+        if (!delayManager.hasDelayedAction(entity, actionId)) {
             // Schedule for the gate to be looked either immediately (during "update" method) or at least
             // GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL from the time it has last changed, whichever is later
-            SignalDelayedActionComponent delayedAction = new SignalDelayedActionComponent();
-            long whenToLookAt;
+            long delay;
             final ImmutableBlockLocation location = new ImmutableBlockLocation(entity.getComponent(BlockComponent.class).getPosition());
             if (gateLastSignalChangeTime.containsKey(location)) {
-                whenToLookAt = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL;
+                delay = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL - time.getGameTimeInMs();
             } else {
-                whenToLookAt = time.getGameTimeInMs();
+                delay = 0;
             }
-            delayedAction.executeTime = whenToLookAt;
-            entity.addComponent(delayedAction);
+            delayManager.addDelayedAction(entity, actionId, delay);
         }
     }
 
@@ -475,50 +454,5 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             return true;
         }
         return false;
-    }
-
-    private final class BlockAtLocationDelayedAction {
-        private long executeTime;
-        private ImmutableBlockLocation blockLocation;
-
-        private BlockAtLocationDelayedAction(Vector3i location, long executeTime) {
-            this.blockLocation = new ImmutableBlockLocation(location);
-            this.executeTime = executeTime;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            BlockAtLocationDelayedAction that = (BlockAtLocationDelayedAction) o;
-
-            if (executeTime != that.executeTime) {
-                return false;
-            }
-            if (blockLocation != null ? !blockLocation.equals(that.blockLocation) : that.blockLocation != null) {
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = (int) (executeTime ^ (executeTime >>> 32));
-            result = 31 * result + (blockLocation != null ? blockLocation.hashCode() : 0);
-            return result;
-        }
-    }
-
-    private class ExecutionTimeOrdering implements Comparator<BlockAtLocationDelayedAction> {
-        @Override
-        public int compare(BlockAtLocationDelayedAction o1, BlockAtLocationDelayedAction o2) {
-            return Long.valueOf(o1.executeTime).compareTo(o2.executeTime);
-        }
     }
 }

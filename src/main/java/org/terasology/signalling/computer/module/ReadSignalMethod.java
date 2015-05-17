@@ -21,18 +21,15 @@ import org.terasology.computer.FunctionParamValidationUtil;
 import org.terasology.computer.context.ComputerCallback;
 import org.terasology.computer.system.server.lang.AbstractModuleMethodExecutable;
 import org.terasology.math.Direction;
-import org.terasology.math.Side;
-import org.terasology.math.SideBitFlag;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 
-import java.util.EnumSet;
 import java.util.Map;
 
 public class ReadSignalMethod extends AbstractModuleMethodExecutable<Object> {
     private String methodName;
 
     public ReadSignalMethod(String methodName) {
-        super("Reads signal from the specified side.", "Boolean", "If there is a signal coming in from the specified direction.");
+        super("Reads signal from the specified side.<l>Note, that you cannot read a signal from a side that this computer is emitting signal on.", "Number", "Signal strength on that side: 0 means no signal on that side, -1 means infinite.");
         this.methodName = methodName;
 
         addParameter("direction", "Direction", "Direction from which to read the signal.");
@@ -48,8 +45,11 @@ public class ReadSignalMethod extends AbstractModuleMethodExecutable<Object> {
         Direction direction = FunctionParamValidationUtil.validateDirectionParameter(line, parameters, "direction", methodName);
 
         SignalConsumerAdvancedStatusComponent component = computer.getComputerEntity().getComponent(SignalConsumerAdvancedStatusComponent.class);
-        EnumSet<Side> signals = SideBitFlag.getSides(component.sidesWithSignals);
-
-        return signals.contains(direction.toSide());
+        Integer strength = component.signalStrengths.get(direction.toSide().name());
+        if (strength == null) {
+            return 0;
+        } else {
+            return strength;
+        }
     }
 }

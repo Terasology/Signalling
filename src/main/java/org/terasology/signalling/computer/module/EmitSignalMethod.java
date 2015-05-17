@@ -74,6 +74,11 @@ public class EmitSignalMethod extends AbstractModuleMethodExecutable<Object> {
             throw new ExecutionException(line, "Invalid value in " + methodName + "()");
         }
 
+        if (signalStrength == 0) {
+            // This means "reset", no matter which sides are passed, so no producer is needed on those sides
+            value = 0;
+        }
+
         EntityRef computerEntity = computer.getComputerEntity();
         SignalConsumerComponent consumerComponent = computerEntity.getComponent(SignalConsumerComponent.class);
         consumerComponent.connectionSides = 0;
