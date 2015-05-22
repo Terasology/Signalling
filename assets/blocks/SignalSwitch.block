@@ -1,5 +1,8 @@
 {
     "displayName": "Signal Emitter",
+    "tiles": {
+        "all": "signalling:SignalOutput",
+    },
     "entity": {
         "prefab": "signalling:SignalSwitch"
     }

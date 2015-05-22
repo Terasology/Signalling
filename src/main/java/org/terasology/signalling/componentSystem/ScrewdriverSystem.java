@@ -22,18 +22,15 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.math.Side;
-import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
+import org.terasology.signalling.components.RotateableByScrewdriverComponent;
 import org.terasology.signalling.components.ScrewdriverComponent;
-import org.terasology.signalling.components.SignalConsumerComponent;
-import org.terasology.signalling.components.SignalGateComponent;
-import org.terasology.signalling.components.SignalGateRotatedComponent;
-import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.BlockFamily;
+import org.terasology.world.block.family.RotationBlockFamily;
 import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 import java.util.EnumMap;
@@ -60,7 +57,7 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     @ReceiveEvent(components = {ScrewdriverComponent.class})
     public void rotateGate(ActivateEvent event, EntityRef screwdriver) {
         final EntityRef target = event.getTarget();
-        if (target.hasComponent(SignalGateComponent.class)) {
+        if (target.hasComponent(RotateableByScrewdriverComponent.class)) {
             final Vector3i targetLocation = new Vector3i(event.getTargetLocation());
             final Block block = worldProvider.getBlock(targetLocation);
             final BlockFamily blockFamily = block.getBlockFamily();
@@ -74,27 +71,13 @@ public class ScrewdriverSystem extends BaseComponentSystem {
                     blockForSide = sideDefinedBlockFamily.getBlockForSide(newSide);
                 } while (blockForSide == null);
 
-                if (worldProvider.setBlock(targetLocation, blockForSide) != null) {
-                    final EntityRef gateEntity = blockEntityRegistry.getBlockEntityAt(targetLocation);
-
-                    final SignalProducerComponent signalProducer = gateEntity.getComponent(SignalProducerComponent.class);
-                    final SignalConsumerComponent signalConsumer = gateEntity.getComponent(SignalConsumerComponent.class);
-
-                    signalConsumer.connectionSides = 0;
-                    gateEntity.saveComponent(signalConsumer);
-
-                    final byte newSideBit = SideBitFlag.getSide(newSide);
-                    signalProducer.connectionSides = newSideBit;
-                    signalConsumer.connectionSides = (byte) (63 - newSideBit);
-
-                    gateEntity.saveComponent(signalProducer);
-                    gateEntity.saveComponent(signalConsumer);
-
-                    if (newSide == Side.FRONT) {
-                        gateEntity.removeComponent(SignalGateRotatedComponent.class);
-                    } else if (!gateEntity.hasComponent(SignalGateRotatedComponent.class)) {
-                        gateEntity.addComponent(new SignalGateRotatedComponent());
-                    }
+                worldProvider.setBlock(targetLocation, blockForSide);
+            } else if (blockFamily instanceof RotationBlockFamily) {
+                RotationBlockFamily rotationBlockFamily = (RotationBlockFamily) blockFamily;
+                Side clickedSide = Side.inDirection(event.getHitNormal());
+                Block rotatedBlock = rotationBlockFamily.getRolledClockwise(block, clickedSide);
+                if (rotatedBlock != null) {
+                    worldProvider.setBlock(targetLocation, rotatedBlock);
                 }
             }
         }

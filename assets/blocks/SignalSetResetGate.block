@@ -1,10 +1,10 @@
 {
     "displayName": "Signal Set/Reset Gate",
-    "rotation": "leftArchetypeHorizontal",
+    "rotation": "horizontal",
     "tiles": {
         "sides": "signalling:SignalSet",
         "topBottom": "signalling:SignalReset",
-        "front": "signalling:SignalSwitch"
+        "front": "signalling:SignalOutput"
     },
     "entity": {
         "prefab": "signalling:SignalSetResetGate"

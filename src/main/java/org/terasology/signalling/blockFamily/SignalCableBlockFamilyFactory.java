@@ -19,11 +19,14 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.signalling.SignallingUtil;
 import org.terasology.signalling.components.SignalConductorComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.family.ConnectionCondition;
 import org.terasology.world.block.family.RegisterBlockFamilyFactory;
 import org.terasology.world.block.family.UpdatesWithNeighboursFamilyFactory;
@@ -50,18 +53,24 @@ public class SignalCableBlockFamilyFactory extends UpdatesWithNeighboursFamilyFa
         private boolean connectsToNeighbor(Side connectSide, EntityRef neighborEntity) {
             final Side oppositeDirection = connectSide.reverse();
 
+            Block block = neighborEntity.getComponent(BlockComponent.class).getBlock();
+
             final SignalConductorComponent neighborConductorComponent = neighborEntity.getComponent(SignalConductorComponent.class);
-            if (neighborConductorComponent != null && SideBitFlag.hasSide(neighborConductorComponent.connectionSides, oppositeDirection)) {
-                return true;
+            if (neighborConductorComponent != null) {
+                for (byte connectionGroup : neighborConductorComponent.connectionGroups) {
+                    if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup), oppositeDirection)) {
+                        return true;
+                    }
+                }
             }
 
             final SignalConsumerComponent neighborConsumerComponent = neighborEntity.getComponent(SignalConsumerComponent.class);
-            if (neighborConsumerComponent != null && SideBitFlag.hasSide(neighborConsumerComponent.connectionSides, oppositeDirection)) {
+            if (neighborConsumerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborConsumerComponent.connectionSides), oppositeDirection)) {
                 return true;
             }
 
             final SignalProducerComponent neighborProducerComponent = neighborEntity.getComponent(SignalProducerComponent.class);
-            if (neighborProducerComponent != null && SideBitFlag.hasSide(neighborProducerComponent.connectionSides, oppositeDirection)) {
+            if (neighborProducerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborProducerComponent.connectionSides), oppositeDirection)) {
                 return true;
             }
 

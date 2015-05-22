@@ -16,7 +16,10 @@
 package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.Side;
 import org.terasology.world.block.RequiresBlockLifecycleEvents;
+
+import java.util.Set;
 
 @RequiresBlockLifecycleEvents
 public class SignalConsumerComponent implements Component {

@@ -27,6 +27,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
+import org.terasology.math.Side;
 import org.terasology.mobileBlocks.server.AfterBlockMovedEvent;
 import org.terasology.mobileBlocks.server.BeforeBlockMovesEvent;
 import org.terasology.mobileBlocks.server.BlockTransitionDuringMoveEvent;
@@ -35,6 +36,9 @@ import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponen
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.BlockEntityRegistry;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SignalModuleServerSystem extends BaseComponentSystem {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2015 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.signalling.blockFamily;
+package org.terasology.signalling.components;
 
-import org.terasology.math.Side;
-import org.terasology.world.block.family.HorizontalBlockFamilyFactory;
-import org.terasology.world.block.family.RegisterBlockFamilyFactory;
+import org.terasology.entitySystem.Component;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
-@RegisterBlockFamilyFactory("leftArchetypeHorizontal")
-public class LeftArchetypeHorizontalBlockFamilyFactory extends HorizontalBlockFamilyFactory {
-    @Override
-    protected Side getArchetypeSide() {
-        return Side.LEFT;
-    }
+public class RotateableByScrewdriverComponent implements Component {
 }

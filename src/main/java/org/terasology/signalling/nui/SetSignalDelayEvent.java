@@ -25,6 +25,9 @@ import org.terasology.network.ServerEvent;
 public class SetSignalDelayEvent extends NetworkEvent {
     private long time;
 
+    public SetSignalDelayEvent() {
+    }
+
     public SetSignalDelayEvent(long time) {
         this.time = time;
     }

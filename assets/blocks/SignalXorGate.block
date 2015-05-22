@@ -1,9 +1,10 @@
 {
     "displayName": "Signal XOR Gate",
-    "rotation": "allSides",
+    "rotation": "fullRotation",
     "tiles": {
         "all": "signalling:SignalXorGate",
-        "front": "signalling:SignalSwitch"
+        "front": "signalling:SignalOutput",
+        "back": "signalling:NoSignal"
     },
     "entity": {
         "prefab": "signalling:SignalXorGate"

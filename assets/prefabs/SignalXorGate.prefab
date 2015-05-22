@@ -1,11 +1,11 @@
 {
-    "SignalGate": {},
+    "RotateableByScrewdriver": {},
     "SignalProducer": {
         "connectionSides": 4,
         "signalStrength": 0
     },
     "SignalConsumer": {
-        "connectionSides": 59,
+        "connectionSides": 27,
         "mode": "EXACTLY_ONE"
     },
     "SignalConsumerStatus": {
