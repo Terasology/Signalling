@@ -75,7 +75,7 @@ public class ScrewdriverSystem extends BaseComponentSystem {
             } else if (blockFamily instanceof RotationBlockFamily) {
                 RotationBlockFamily rotationBlockFamily = (RotationBlockFamily) blockFamily;
                 Side clickedSide = Side.inDirection(event.getHitNormal());
-                Block rotatedBlock = rotationBlockFamily.getRolledClockwise(block, clickedSide);
+                Block rotatedBlock = rotationBlockFamily.getBlockForClockwiseRotation(block, clickedSide);
                 if (rotatedBlock != null) {
                     worldProvider.setBlock(targetLocation, rotatedBlock);
                 }
