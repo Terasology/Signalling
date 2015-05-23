@@ -20,10 +20,7 @@ import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.RotationBlockFamily;
-
-import java.util.EnumSet;
-import java.util.Set;
+import org.terasology.signalling.blockFamily.RotationBlockFamily;
 
 public final class SignallingUtil {
     private SignallingUtil() {

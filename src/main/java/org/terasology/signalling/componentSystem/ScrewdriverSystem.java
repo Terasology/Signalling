@@ -30,7 +30,7 @@ import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.RotationBlockFamily;
+import org.terasology.signalling.blockFamily.RotationBlockFamily;
 import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 import java.util.EnumMap;
