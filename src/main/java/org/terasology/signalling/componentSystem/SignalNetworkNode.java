@@ -23,12 +23,13 @@ import org.terasology.math.geom.Vector3i;
  */
 public class SignalNetworkNode extends NetworkNode {
     public enum Type {
-        PRODUCER, CONSUMER, CONDUCTOR}
+        PRODUCER, CONSUMER, CONDUCTOR
+    }
 
     private Type type;
 
     public SignalNetworkNode(Vector3i location, byte connectionSides, Type type) {
-        super(location, connectionSides);
+        super(location, (type == Type.PRODUCER) ? 0 : connectionSides, (type == Type.CONSUMER) ? 0 : connectionSides);
         this.type = type;
     }
 
