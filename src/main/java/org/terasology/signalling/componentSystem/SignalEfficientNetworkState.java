@@ -15,41 +15,32 @@
  */
 package org.terasology.signalling.componentSystem;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.terasology.blockNetwork.Network2;
 import org.terasology.blockNetwork.NetworkChangeReason;
 import org.terasology.blockNetwork.EfficientNetworkTopologyListener;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 public class SignalEfficientNetworkState implements EfficientNetworkTopologyListener<SignalNetworkNode> {
-    private Multimap<SignalNetworkNode, Network2<SignalNetworkNode>> producerNetworks = HashMultimap.create();
-    private Multimap<Network2<SignalNetworkNode>, SignalNetworkNode> producersInNetwork = HashMultimap.create();
-
-    private Multimap<SignalNetworkNode, Network2<SignalNetworkNode>> consumerNetworks = HashMultimap.create();
-    private Multimap<Network2<SignalNetworkNode>, SignalNetworkNode> consumersInNetwork = HashMultimap.create();
-
     private Set<Network2<SignalNetworkNode>> networksToRecalculate = Sets.newHashSet();
     private Set<SignalNetworkNode> consumersToRecalculate = Sets.newHashSet();
 
-    public Collection<SignalNetworkNode> getProducersInNetwork(Network2<SignalNetworkNode> network) {
-        return Collections.unmodifiableCollection(producersInNetwork.get(network));
-    }
-
-    public Collection<SignalNetworkNode> getConsumersInNetwork(Network2<SignalNetworkNode> network) {
-        return Collections.unmodifiableCollection(consumersInNetwork.get(network));
-    }
-
-    public Collection<Network2<SignalNetworkNode>> getNetworksWithProducer(SignalNetworkNode node) {
-        return Collections.unmodifiableCollection(producerNetworks.get(node));
-    }
-
-    public Collection<Network2<SignalNetworkNode>> getNetworksWithConsumer(SignalNetworkNode node) {
-        return Collections.unmodifiableCollection(consumerNetworks.get(node));
+    private Iterable<SignalNetworkNode> getConsumersInNetwork(Network2<SignalNetworkNode> network) {
+        return Iterables.filter(network.getLeafNodes(),
+                new Predicate<SignalNetworkNode>() {
+                    @Override
+                    public boolean apply(@Nullable SignalNetworkNode input) {
+                        return input.getType() == SignalNetworkNode.Type.CONSUMER;
+                    }
+                });
     }
 
     public Collection<Network2<SignalNetworkNode>> consumeNetworksToRecalculate() {
@@ -67,24 +58,11 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
     @Override
     public void networkAdded(Network2<SignalNetworkNode> network, NetworkChangeReason reason) {
         networksToRecalculate.add(network);
-        for (SignalNetworkNode signalNetworkNode : network.getLeafNodes()) {
-            if (signalNetworkNode.getType() == SignalNetworkNode.Type.CONSUMER) {
-                consumerNetworks.put(signalNetworkNode, network);
-                consumersInNetwork.put(network, signalNetworkNode);
-            } else {
-                producerNetworks.put(signalNetworkNode, network);
-                producersInNetwork.put(network, signalNetworkNode);
-            }
-        }
     }
 
     @Override
     public void networkRemoved(Network2<SignalNetworkNode> network, NetworkChangeReason reason) {
-        for (SignalNetworkNode signalNetworkNode : producersInNetwork.removeAll(network)) {
-            producerNetworks.remove(signalNetworkNode, network);
-        }
-        for (SignalNetworkNode signalNetworkNode : consumersInNetwork.removeAll(network)) {
-            consumerNetworks.remove(signalNetworkNode, network);
+        for (SignalNetworkNode signalNetworkNode : getConsumersInNetwork(network)) {
             consumersToRecalculate.add(signalNetworkNode);
         }
     }
@@ -104,12 +82,8 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
         for (SignalNetworkNode modifiedLeafNode : leafNodes) {
             if (modifiedLeafNode.getType() == SignalNetworkNode.Type.PRODUCER) {
                 networksToRecalculate.add(network);
-                producerNetworks.put(modifiedLeafNode, network);
-                producersInNetwork.put(network, modifiedLeafNode);
             } else {
                 consumersToRecalculate.add(modifiedLeafNode);
-                consumerNetworks.put(modifiedLeafNode, network);
-                consumersInNetwork.put(network, modifiedLeafNode);
             }
         }
     }
@@ -119,12 +93,8 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
         for (SignalNetworkNode modifiedLeafNode : leafNodes) {
             if (modifiedLeafNode.getType() == SignalNetworkNode.Type.PRODUCER) {
                 networksToRecalculate.add(network);
-                producerNetworks.remove(modifiedLeafNode, network);
-                producersInNetwork.remove(network, modifiedLeafNode);
             } else {
                 consumersToRecalculate.add(modifiedLeafNode);
-                consumerNetworks.remove(modifiedLeafNode, network);
-                consumersInNetwork.remove(network, modifiedLeafNode);
             }
         }
     }
