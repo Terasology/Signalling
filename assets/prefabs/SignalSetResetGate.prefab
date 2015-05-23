@@ -9,5 +9,9 @@
         "mode": "SPECIAL"
     },
     "SignalConsumerAdvancedStatus": {
+    },
+    "SignalGate": {
+        "gateType": "SET_RESET",
+        "functionalSides": ["BACK", "LEFT", "RIGHT", "TOP", "BOTTOM"]
     }
 }

@@ -10,5 +10,9 @@
     },
     "SignalConsumerStatus": {
         "hasSignal": false
+    },
+    "SignalGate": {
+        "gateType": "XOR",
+        "functionalSides": []
     }
 }

@@ -12,5 +12,9 @@
     },
     "SignalConsumerStatus": {
         "hasSignal": false
+    },
+    "SignalGate": {
+        "gateType": "OFF_DELAY",
+        "functionalSides": []
     }
 }

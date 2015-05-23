@@ -26,12 +26,22 @@ public final class SignallingUtil {
     private SignallingUtil() {
     }
 
-    public static byte getResultConnections(Block block, byte definedSides) {
+    public static Side getResultSide(Block block, Side definedSide) {
+        Rotation rotation = getRotation(block);
+        return rotation.rotate(definedSide);
+    }
+
+    private static Rotation getRotation(Block block) {
         Rotation rotation = Rotation.none();
         BlockFamily blockFamily = block.getBlockFamily();
         if (blockFamily instanceof RotationBlockFamily) {
             rotation = ((RotationBlockFamily) blockFamily).getRotation(block);
         }
+        return rotation;
+    }
+
+    public static byte getResultConnections(Block block, byte definedSides) {
+        Rotation rotation = getRotation(block);
 
         byte result = 0;
         for (Side side : SideBitFlag.getSides(definedSides)) {
@@ -42,11 +52,7 @@ public final class SignallingUtil {
     }
 
     public static byte getSourceConnections(Block block, byte connections) {
-        Rotation rotation = Rotation.none();
-        BlockFamily blockFamily = block.getBlockFamily();
-        if (blockFamily instanceof RotationBlockFamily) {
-            rotation = ((RotationBlockFamily) blockFamily).getRotation(block);
-        }
+        Rotation rotation = getRotation(block);
 
         rotation = Rotation.findReverse(rotation);
 

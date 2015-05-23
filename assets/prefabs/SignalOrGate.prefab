@@ -9,5 +9,9 @@
     },
     "SignalConsumerStatus": {
         "hasSignal": false
+    },
+    "SignalGate": {
+        "gateType": "OR",
+        "functionalSides": []
     }
 }
