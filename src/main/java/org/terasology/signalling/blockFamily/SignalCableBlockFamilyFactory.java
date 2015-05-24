@@ -46,32 +46,57 @@ public class SignalCableBlockFamilyFactory extends UpdatesWithNeighboursFamilyFa
             Vector3i neighborLocation = new Vector3i(blockLocation);
             neighborLocation.add(connectSide.getVector3i());
 
+            byte sourceConnection = SignallingUtil.getSourceConnections(worldProvider.getBlock(blockLocation), SideBitFlag.getSide(connectSide));
+
+            boolean input = false;
+            boolean output = false;
+            EntityRef blockEntity = blockEntityRegistry.getBlockEntityAt(blockLocation);
+            for (SignalConductorComponent.ConnectionGroup connectionGroup : blockEntity.getComponent(SignalConductorComponent.class).connectionGroups) {
+                input |= (connectionGroup.inputSides & sourceConnection) > 0;
+                output |= (connectionGroup.outputSides & sourceConnection) > 0;
+            }
+
+            if (!input && !output) {
+                return false;
+            }
             EntityRef neighborEntity = blockEntityRegistry.getBlockEntityAt(neighborLocation);
-            return neighborEntity != null && connectsToNeighbor(connectSide, neighborEntity);
+            return neighborEntity != null && connectsToNeighbor(connectSide, input, output, neighborEntity);
         }
 
-        private boolean connectsToNeighbor(Side connectSide, EntityRef neighborEntity) {
+        private boolean connectsToNeighbor(Side connectSide, boolean input, boolean output, EntityRef neighborEntity) {
             final Side oppositeDirection = connectSide.reverse();
 
             Block block = neighborEntity.getComponent(BlockComponent.class).getBlock();
 
             final SignalConductorComponent neighborConductorComponent = neighborEntity.getComponent(SignalConductorComponent.class);
             if (neighborConductorComponent != null) {
-                for (byte connectionGroup : neighborConductorComponent.connectionGroups) {
-                    if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup), oppositeDirection)) {
-                        return true;
+                if (output) {
+                    for (SignalConductorComponent.ConnectionGroup connectionGroup : neighborConductorComponent.connectionGroups) {
+                        if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
+                            return true;
+                        }
+                    }
+                }
+                if (input) {
+                    for (SignalConductorComponent.ConnectionGroup connectionGroup : neighborConductorComponent.connectionGroups) {
+                        if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
+                            return true;
+                        }
                     }
                 }
             }
 
-            final SignalConsumerComponent neighborConsumerComponent = neighborEntity.getComponent(SignalConsumerComponent.class);
-            if (neighborConsumerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborConsumerComponent.connectionSides), oppositeDirection)) {
-                return true;
+            if (output) {
+                final SignalConsumerComponent neighborConsumerComponent = neighborEntity.getComponent(SignalConsumerComponent.class);
+                if (neighborConsumerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborConsumerComponent.connectionSides), oppositeDirection)) {
+                    return true;
+                }
             }
-
-            final SignalProducerComponent neighborProducerComponent = neighborEntity.getComponent(SignalProducerComponent.class);
-            if (neighborProducerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborProducerComponent.connectionSides), oppositeDirection)) {
-                return true;
+            if (input) {
+                final SignalProducerComponent neighborProducerComponent = neighborEntity.getComponent(SignalProducerComponent.class);
+                if (neighborProducerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborProducerComponent.connectionSides), oppositeDirection)) {
+                    return true;
+                }
             }
 
             return false;

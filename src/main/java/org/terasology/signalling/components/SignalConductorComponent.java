@@ -16,11 +16,18 @@
 package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.reflection.MappedContainer;
 import org.terasology.world.block.RequiresBlockLifecycleEvents;
 
-import java.util.List;
+import java.util.Set;
 
 @RequiresBlockLifecycleEvents
 public class SignalConductorComponent implements Component {
-    public List<Byte> connectionGroups;
+    public Set<ConnectionGroup> connectionGroups;
+
+    @MappedContainer
+    public static class ConnectionGroup {
+        public byte inputSides;
+        public byte outputSides;
+    }
 }

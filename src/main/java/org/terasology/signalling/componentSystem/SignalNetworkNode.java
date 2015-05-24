@@ -28,8 +28,8 @@ public class SignalNetworkNode extends NetworkNode {
 
     private Type type;
 
-    public SignalNetworkNode(Vector3i location, byte connectionSides, Type type) {
-        super(location, (type == Type.PRODUCER) ? 0 : connectionSides, (type == Type.CONSUMER) ? 0 : connectionSides);
+    public SignalNetworkNode(Vector3i location, byte inputSides, byte outputSides, Type type) {
+        super(location, inputSides, outputSides);
         this.type = type;
     }
 

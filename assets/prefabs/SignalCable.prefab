@@ -1,5 +1,10 @@
 {
     "SignalConductor": {
-        "connectionGroups": [63]
+        "connectionGroups": [
+            {
+                "inputSides": 63,
+                "outputSides": 63
+            }
+        ]
     }
 }

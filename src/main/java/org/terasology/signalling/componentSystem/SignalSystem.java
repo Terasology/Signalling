@@ -363,9 +363,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return result;
     }
 
-
-    private SignalNetworkNode toNode(Vector3i location, byte definedSides, SignalNetworkNode.Type type) {
-        return new SignalNetworkNode(location, getConnections(location, definedSides), type);
+    private SignalNetworkNode toNode(Vector3i location, int inputDefinedSides, int outputDefinedSides, SignalNetworkNode.Type type) {
+        return new SignalNetworkNode(location, getConnections(location, (byte) inputDefinedSides), getConnections(location, (byte) outputDefinedSides), type);
     }
 
     private byte getConnections(Vector3i location, byte definedSides) {
@@ -378,10 +377,10 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
     @ReceiveEvent(components = {SignalConductorComponent.class})
     public void prefabConductorLoaded(OnActivatedBlocks event, EntityRef blockType) {
-        for (Byte connectionGroup : blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
+        for (SignalConductorComponent.ConnectionGroup connectionGroup : blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
             Set<SignalNetworkNode> conductorNodes = Sets.newHashSet();
             for (Vector3i location : event.getBlockPositions()) {
-                final SignalNetworkNode conductorNode = toNode(location, connectionGroup, SignalNetworkNode.Type.CONDUCTOR);
+                final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
                 conductorNodes.add(conductorNode);
             }
             signalNetwork.addNetworkingBlocks(conductorNodes, NetworkChangeReason.CHUNK_EVENT);
@@ -390,11 +389,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
     @ReceiveEvent(components = {SignalConductorComponent.class})
     public void prefabConductorUnloaded(BeforeDeactivateBlocks event, EntityRef blockType) {
-        for (Byte connectionGroup : blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
+        for (SignalConductorComponent.ConnectionGroup connectionGroup : blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
             Set<SignalNetworkNode> conductorNodes = Sets.newHashSet();
             // Quite messy due to the order of operations, need to check if the order is important
             for (Vector3i location : event.getBlockPositions()) {
-                final SignalNetworkNode conductorNode = toNode(location, connectionGroup, SignalNetworkNode.Type.CONDUCTOR);
+                final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
                 conductorNodes.add(conductorNode);
             }
             signalNetwork.removeNetworkingBlocks(conductorNodes, NetworkChangeReason.CHUNK_EVENT);
@@ -404,8 +403,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     @ReceiveEvent(components = {BlockComponent.class, SignalConductorComponent.class})
     public void conductorAdded(OnActivatedComponent event, EntityRef block) {
         final Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
-        for (Byte connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
-            final SignalNetworkNode conductorNode = toNode(location, connectionGroup, SignalNetworkNode.Type.CONDUCTOR);
+        for (SignalConductorComponent.ConnectionGroup connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
+            final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
 
             signalNetwork.addNetworkingBlock(conductorNode, NetworkChangeReason.WORLD_CHANGE);
         }
@@ -419,8 +418,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             signalNetwork.removeNetworkingBlocks(oldSignalNodes, NetworkChangeReason.WORLD_CHANGE);
         }
 
-        for (Byte connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
-            final SignalNetworkNode newConductorNode = toNode(new Vector3i(location), connectionGroup, SignalNetworkNode.Type.CONDUCTOR);
+        for (SignalConductorComponent.ConnectionGroup connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
+            final SignalNetworkNode newConductorNode = toNode(new Vector3i(location), connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
             signalNetwork.addNetworkingBlock(newConductorNode, NetworkChangeReason.WORLD_CHANGE);
         }
     }
@@ -428,8 +427,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     @ReceiveEvent(components = {BlockComponent.class, SignalConductorComponent.class})
     public void conductorRemoved(BeforeDeactivateComponent event, EntityRef block) {
         final Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
-        for (Byte connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
-            final SignalNetworkNode conductorNode = toNode(location, connectionGroup, SignalNetworkNode.Type.CONDUCTOR);
+        for (SignalConductorComponent.ConnectionGroup connectionGroup : block.getComponent(SignalConductorComponent.class).connectionGroups) {
+            final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
             signalNetwork.removeNetworkingBlock(conductorNode, NetworkChangeReason.WORLD_CHANGE);
         }
     }
@@ -444,7 +443,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         int signalStrength = producerComponent.signalStrength;
         Set<SignalNetworkNode> producerNodes = Sets.newHashSet();
         for (Vector3i location : event.getBlockPositions()) {
-            final SignalNetworkNode producerNode = toNode(location, producerComponent.connectionSides, SignalNetworkNode.Type.PRODUCER);
+            final SignalNetworkNode producerNode = toNode(location, 0, producerComponent.connectionSides, SignalNetworkNode.Type.PRODUCER);
 
             producerSignalStrengths.put(producerNode, signalStrength);
             producerNodes.add(producerNode);
@@ -458,7 +457,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         // Quite messy due to the order of operations, need to check if the order is important
         Set<SignalNetworkNode> producerNodes = Sets.newHashSet();
         for (Vector3i location : event.getBlockPositions()) {
-            final SignalNetworkNode producerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
+            final SignalNetworkNode producerNode = toNode(location, 0, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
             producerNodes.add(producerNode);
         }
 
@@ -475,7 +474,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         final int signalStrength = producerComponent.signalStrength;
         byte connectingOnSides = producerComponent.connectionSides;
 
-        final SignalNetworkNode producerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
+        final SignalNetworkNode producerNode = toNode(location, 0, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
 
         producerSignalStrengths.put(producerNode, signalStrength);
         signalNetwork.addLeafBlock(producerNode, NetworkChangeReason.WORLD_CHANGE);
@@ -500,7 +499,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             }
 
             byte newConnectionSides = getConnections(blockLocation.toVector3i(), producerComponent.connectionSides);
-            SignalNetworkNode node = toNode(location, newConnectionSides, SignalNetworkNode.Type.PRODUCER);
+            SignalNetworkNode node = toNode(location, 0, newConnectionSides, SignalNetworkNode.Type.PRODUCER);
             producerSignalStrengths.put(node, producerComponent.signalStrength);
             signalNetwork.addLeafBlock(node, NetworkChangeReason.WORLD_CHANGE);
 
@@ -513,7 +512,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
         byte connectingOnSides = block.getComponent(SignalProducerComponent.class).connectionSides;
 
-        final SignalNetworkNode producerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
+        final SignalNetworkNode producerNode = toNode(location, 0, connectingOnSides, SignalNetworkNode.Type.PRODUCER);
         signalNetwork.removeLeafBlock(producerNode, NetworkChangeReason.WORLD_CHANGE);
         producerSignalStrengths.remove(producerNode);
     }
@@ -527,7 +526,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         byte connectingOnSides = blockType.getComponent(SignalConsumerComponent.class).connectionSides;
         Set<SignalNetworkNode> consumerNodes = Sets.newHashSet();
         for (Vector3i location : event.getBlockPositions()) {
-            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.CONSUMER);
+            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
 
             consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
             consumerNodes.add(consumerNode);
@@ -542,7 +541,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
         // Quite messy due to the order of operations, need to check if the order is important
         for (Vector3i location : event.getBlockPositions()) {
-            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.CONSUMER);
+            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
             consumerNodes.add(consumerNode);
         }
 
@@ -557,7 +556,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
         byte connectingOnSides = block.getComponent(SignalConsumerComponent.class).connectionSides;
 
-        SignalNetworkNode consumerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.CONSUMER);
+        SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
 
         consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
         signalNetwork.addLeafBlock(consumerNode, NetworkChangeReason.WORLD_CHANGE);
@@ -579,7 +578,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             }
 
             byte newConnectionSides = getConnections(blockLocation.toVector3i(), consumerComponent.connectionSides);
-            SignalNetworkNode node = toNode(location, newConnectionSides, SignalNetworkNode.Type.CONSUMER);
+            SignalNetworkNode node = toNode(location, newConnectionSides, 0, SignalNetworkNode.Type.CONSUMER);
             consumerSignalInNetworks.put(node, Maps.newHashMap());
             signalNetwork.addLeafBlock(node, NetworkChangeReason.WORLD_CHANGE);
 
@@ -593,7 +592,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         Vector3i location = new Vector3i(block.getComponent(BlockComponent.class).getPosition());
         byte connectingOnSides = block.getComponent(SignalConsumerComponent.class).connectionSides;
 
-        final SignalNetworkNode consumerNode = toNode(location, connectingOnSides, SignalNetworkNode.Type.CONSUMER);
+        final SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
         signalNetwork.removeLeafBlock(consumerNode, NetworkChangeReason.WORLD_CHANGE);
         consumerSignalInNetworks.remove(consumerNode);
     }
