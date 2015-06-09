@@ -22,6 +22,7 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.blockNetwork.BlockNetworkUtil;
 import org.terasology.blockNetwork.ImmutableBlockLocation;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -42,7 +43,6 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
-import org.terasology.signalling.SignallingUtil;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerStatusComponent;
 import org.terasology.signalling.components.SignalGateComponent;
@@ -255,7 +255,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent = blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
         Block block = blockEntity.getComponent(BlockComponent.class).getBlock();
         Side resetSide = signalGateComponent.functionalSides.get(0);
-        Integer resetSignal = consumerAdvancedStatusComponent.signalStrengths.get(SignallingUtil.getResultSide(block, resetSide).name());
+        Integer resetSignal = consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, resetSide).name());
 
         SignalProducerComponent producerComponent = blockEntity.getComponent(SignalProducerComponent.class);
         int resultSignal = producerComponent.signalStrength;
@@ -265,7 +265,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             int size = signalGateComponent.functionalSides.size();
             for (int i = 1; i < size; i++) {
                 Side setSide = signalGateComponent.functionalSides.get(i);
-                Integer setSignal = consumerAdvancedStatusComponent.signalStrengths.get(SignallingUtil.getResultSide(block, setSide).name());
+                Integer setSignal = consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, setSide).name());
                 if (setSignal != null && setSignal != 0) {
                     resultSignal = -1;
                     break;

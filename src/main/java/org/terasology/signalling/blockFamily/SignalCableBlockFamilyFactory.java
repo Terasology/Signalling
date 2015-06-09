@@ -15,11 +15,11 @@
  */
 package org.terasology.signalling.blockFamily;
 
+import org.terasology.blockNetwork.BlockNetworkUtil;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.signalling.SignallingUtil;
 import org.terasology.signalling.components.SignalConductorComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
@@ -46,7 +46,7 @@ public class SignalCableBlockFamilyFactory extends UpdatesWithNeighboursFamilyFa
             Vector3i neighborLocation = new Vector3i(blockLocation);
             neighborLocation.add(connectSide.getVector3i());
 
-            byte sourceConnection = SignallingUtil.getSourceConnections(worldProvider.getBlock(blockLocation), SideBitFlag.getSide(connectSide));
+            byte sourceConnection = BlockNetworkUtil.getSourceConnections(worldProvider.getBlock(blockLocation), SideBitFlag.getSide(connectSide));
 
             boolean input = false;
             boolean output = false;
@@ -72,14 +72,14 @@ public class SignalCableBlockFamilyFactory extends UpdatesWithNeighboursFamilyFa
             if (neighborConductorComponent != null) {
                 if (output) {
                     for (SignalConductorComponent.ConnectionGroup connectionGroup : neighborConductorComponent.connectionGroups) {
-                        if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
+                        if (SideBitFlag.hasSide(BlockNetworkUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
                             return true;
                         }
                     }
                 }
                 if (input) {
                     for (SignalConductorComponent.ConnectionGroup connectionGroup : neighborConductorComponent.connectionGroups) {
-                        if (SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
+                        if (SideBitFlag.hasSide(BlockNetworkUtil.getResultConnections(block, connectionGroup.inputSides), oppositeDirection)) {
                             return true;
                         }
                     }
@@ -88,13 +88,13 @@ public class SignalCableBlockFamilyFactory extends UpdatesWithNeighboursFamilyFa
 
             if (output) {
                 final SignalConsumerComponent neighborConsumerComponent = neighborEntity.getComponent(SignalConsumerComponent.class);
-                if (neighborConsumerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborConsumerComponent.connectionSides), oppositeDirection)) {
+                if (neighborConsumerComponent != null && SideBitFlag.hasSide(BlockNetworkUtil.getResultConnections(block, neighborConsumerComponent.connectionSides), oppositeDirection)) {
                     return true;
                 }
             }
             if (input) {
                 final SignalProducerComponent neighborProducerComponent = neighborEntity.getComponent(SignalProducerComponent.class);
-                if (neighborProducerComponent != null && SideBitFlag.hasSide(SignallingUtil.getResultConnections(block, neighborProducerComponent.connectionSides), oppositeDirection)) {
+                if (neighborProducerComponent != null && SideBitFlag.hasSide(BlockNetworkUtil.getResultConnections(block, neighborProducerComponent.connectionSides), oppositeDirection)) {
                     return true;
                 }
             }

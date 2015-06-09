@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.blockNetwork.BlockNetworkUtil;
 import org.terasology.blockNetwork.EfficientBlockNetwork;
 import org.terasology.blockNetwork.ImmutableBlockLocation;
 import org.terasology.blockNetwork.Network2;
@@ -40,7 +41,6 @@ import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
-import org.terasology.signalling.SignallingUtil;
 import org.terasology.signalling.components.SignalConductorComponent;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
@@ -368,7 +368,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     private byte getConnections(Vector3i location, byte definedSides) {
-        return SignallingUtil.getResultConnections(worldProvider.getBlock(location), definedSides);
+        return BlockNetworkUtil.getResultConnections(worldProvider.getBlock(location), definedSides);
     }
 
     /*
