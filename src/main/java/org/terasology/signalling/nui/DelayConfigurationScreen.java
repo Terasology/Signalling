@@ -36,7 +36,7 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
     private long timeMs;
 
     @Override
-    protected void initialise() {
+    public void initialise() {
         WidgetUtil.trySubscribe(this, "delay-decrease", new ActivateEventListener() {
             @Override
             public void onActivated(UIWidget button) {
