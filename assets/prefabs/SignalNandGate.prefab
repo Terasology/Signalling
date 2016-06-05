@@ -12,7 +12,6 @@
         "hasSignal": false
     },
     "SignalGate": {
-        "gateType": "NAND",
-        "functionalSides": []
+        "gateType": "NAND"
     }
 }

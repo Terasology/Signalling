@@ -14,7 +14,6 @@
         "hasSignal": false
     },
     "SignalGate": {
-        "gateType": "ON_DELAY",
-        "functionalSides": []
+        "gateType": "ON_DELAY"
     }
 }

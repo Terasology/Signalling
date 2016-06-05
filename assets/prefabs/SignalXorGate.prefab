@@ -12,7 +12,6 @@
         "hasSignal": false
     },
     "SignalGate": {
-        "gateType": "XOR",
-        "functionalSides": []
+        "gateType": "XOR"
     }
 }

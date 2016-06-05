@@ -11,8 +11,7 @@
         },
         {
             "id" : "ModularComputers",
-            "minVersion" : "0.1.0",
-            "optional": true
+            "minVersion" : "0.1.0"
         }
     ],
     "isServerSideOnly" : false
