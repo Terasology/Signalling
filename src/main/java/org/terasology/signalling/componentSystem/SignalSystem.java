@@ -38,6 +38,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.config.ModuleConfigManager;
 import org.terasology.logic.health.BeforeDestroyEvent;
+import org.terasology.math.Rotation;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3f;
@@ -52,6 +53,7 @@ import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.OnChangedBlock;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.BeforeDeactivateBlocks;
+import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.OnActivatedBlocks;
 import org.terasology.world.block.items.OnBlockItemPlaced;
@@ -379,7 +381,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     public void onBlockPlaced(OnBlockItemPlaced event, EntityRef entityRef) {
         EntityRef ref = event.getPlacedBlock();
         final Vector3i location = event.getPosition();
-        EntityRef e =  blockEntityRegistry.getBlockEntityAt(event.getPosition());
+        Block block = worldProvider.getBlock(location);
 
         if(ref.hasComponent(SignalConductorComponent.class)){
             logger.debug("SignalConductor placed: " + ref.getParentPrefab());
@@ -388,7 +390,18 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
                 signalNetwork.addNetworkingBlock(conductorNode, NetworkChangeReason.WORLD_CHANGE);
             }
         }
-        if(ref.hasComponent(SignalProducerComponent.class))
+
+        if(ref.hasComponent(SignalConsumerComponent.class))
+        {
+            logger.debug("SignalConsumer placed: " + ref.getParentPrefab());
+            byte connectingOnSides = ref.getComponent(SignalConsumerComponent.class).connectionSides;
+
+            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
+
+            consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
+            signalNetwork.addLeafBlock(consumerNode, NetworkChangeReason.WORLD_CHANGE);
+        }
+        else if(ref.hasComponent(SignalProducerComponent.class))
         {
             logger.debug("SignalProducer placed: " + ref.getParentPrefab());
             final SignalProducerComponent producerComponent = ref.getComponent(SignalProducerComponent.class);
@@ -399,16 +412,6 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
             producerSignalStrengths.put(producerNode, signalStrength);
             signalNetwork.addLeafBlock(producerNode, NetworkChangeReason.WORLD_CHANGE);
-        }
-        if(ref.hasComponent(SignalConsumerComponent.class))
-        {
-            logger.debug("SignalConsumer placed: " + ref.getParentPrefab());
-            byte connectingOnSides = ref.getComponent(SignalConsumerComponent.class).connectionSides;
-
-            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0, SignalNetworkNode.Type.CONSUMER);
-
-            consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
-            signalNetwork.addLeafBlock(consumerNode, NetworkChangeReason.WORLD_CHANGE);
         }
 
     }

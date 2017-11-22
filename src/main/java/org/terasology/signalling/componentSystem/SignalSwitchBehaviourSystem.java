@@ -385,7 +385,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
 
-    @ReceiveEvent()
+    @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
     public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate, BlockComponent block) {
         String gateType = signalGate.gateType;
         GateSignalChangeHandler gateSignalChangeHandler = signalChangeHandlers.get(gateType);
@@ -449,9 +449,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     private void signalChangedForNotGate(EntityRef entity, SignalConsumerStatusComponent consumerStatusComponent) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
-        }
+        logger.debug("Gate has signal: " + consumerStatusComponent.hasSignal);
         delayGateSignalChangeIfNeeded(entity, REVERTED_GATE_ID);
     }
 
