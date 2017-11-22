@@ -43,7 +43,9 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
+import org.terasology.rendering.logic.LightComponent;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
+import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalConsumerStatusComponent;
 import org.terasology.signalling.components.SignalGateComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
@@ -87,6 +89,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private BlockEntityRegistry blockEntityRegistry;
     @In
     private DelayManager delayManager;
+
 
     private Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
 
@@ -231,9 +234,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private boolean processOutputForNormalGate(EntityRef blockEntity) {
         boolean hasSignal = blockEntity.getComponent(SignalConsumerStatusComponent.class).hasSignal;
-        if (logger.isDebugEnabled()) {
-            logger.debug("Processing gate, hasSignal=" + hasSignal);
-        }
+        logger.debug("Processing gate, hasSignal=" + hasSignal);
         if (hasSignal) {
             return startProducingSignal(blockEntity, -1);
         } else {
@@ -383,7 +384,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
-    @ReceiveEvent
+
+    @ReceiveEvent()
     public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate, BlockComponent block) {
         String gateType = signalGate.gateType;
         GateSignalChangeHandler gateSignalChangeHandler = signalChangeHandlers.get(gateType);
@@ -398,11 +400,19 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
             Vector3i blockLocation = new Vector3i(entity.getComponent(BlockComponent.class).getPosition());
             Block block = worldProvider.getBlock(blockLocation);
+
+            SignalConsumerComponent signalConsumerComponent = entity.getComponent(SignalConsumerComponent.class);
+
             if (block == lampTurnedOff && consumerStatusComponent.hasSignal) {
+                lampTurnedOn.setKeepActive(true);
                 worldProvider.setBlock(blockLocation, lampTurnedOn);
             } else if (block == lampTurnedOn && !consumerStatusComponent.hasSignal) {
+                lampTurnedOff.setKeepActive(true);
                 worldProvider.setBlock(blockLocation, lampTurnedOff);
             }
+            blockEntityRegistry.getBlockEntityAt(blockLocation).addOrSaveComponent(signalConsumerComponent);
+            worldProvider.getBlock(blockLocation).setKeepActive(true);
+
         }
     }
 
