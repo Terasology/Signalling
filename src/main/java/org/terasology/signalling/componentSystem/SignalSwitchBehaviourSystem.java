@@ -43,7 +43,6 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
-import org.terasology.rendering.logic.LightComponent;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalConsumerStatusComponent;
