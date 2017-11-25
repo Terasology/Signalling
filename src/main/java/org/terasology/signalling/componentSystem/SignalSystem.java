@@ -377,7 +377,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         final Vector3i location = event.getPosition();
         Block block = worldProvider.getBlock(location);
 
-        if (ref.hasComponent(SignalConductorComponent.class)) {
+        if(ref.hasComponent(SignalConductorComponent.class)){
             logger.debug("SignalConductor placed: " + ref.getParentPrefab());
             for (SignalConductorComponent.ConnectionGroup connectionGroup : ref.getComponent(SignalConductorComponent.class).connectionGroups) {
                 final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides, connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
@@ -385,7 +385,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             }
         }
 
-        if (ref.hasComponent(SignalConsumerComponent.class)) {
+        if(ref.hasComponent(SignalConsumerComponent.class))
+        {
             logger.debug("SignalConsumer placed: " + ref.getParentPrefab());
             byte connectingOnSides = ref.getComponent(SignalConsumerComponent.class).connectionSides;
 
@@ -393,7 +394,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
 
             consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
             signalNetwork.addLeafBlock(consumerNode, NetworkChangeReason.WORLD_CHANGE);
-        } else if (ref.hasComponent(SignalProducerComponent.class)) {
+        }
+        else if(ref.hasComponent(SignalProducerComponent.class))
+        {
             logger.debug("SignalProducer placed: " + ref.getParentPrefab());
             final SignalProducerComponent producerComponent = ref.getComponent(SignalProducerComponent.class);
             final int signalStrength = producerComponent.signalStrength;
@@ -436,6 +439,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             signalNetwork.removeNetworkingBlocks(conductorNodes, NetworkChangeReason.CHUNK_EVENT);
         }
     }
+
 
 
     @ReceiveEvent(components = {BlockComponent.class, SignalConductorComponent.class})
@@ -482,6 +486,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
 
+
     @ReceiveEvent(components = {SignalProducerComponent.class})
     public void producerUpdated(OnChangedComponent event, EntityRef block) {
         logger.debug("Producer updated: " + block.getParentPrefab());
@@ -497,7 +502,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
                 }
             }
 
-            SignalNetworkNode node = toNode(location, 0, producerComponent.connectionSides, SignalNetworkNode.Type.PRODUCER);
+            SignalNetworkNode node = toNode(location, 0,  producerComponent.connectionSides, SignalNetworkNode.Type.PRODUCER);
             producerSignalStrengths.put(node, producerComponent.signalStrength);
             signalNetwork.addLeafBlock(node, NetworkChangeReason.WORLD_CHANGE);
 
@@ -548,6 +553,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             consumerSignalInNetworks.remove(consumerNode);
         }
     }
+
 
 
     @ReceiveEvent(components = {SignalConsumerComponent.class})

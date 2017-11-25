@@ -16,13 +16,11 @@
 package org.terasology.signalling.componentSystem;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.terasology.blockNetwork.EfficientNetworkTopologyListener;
 import org.terasology.blockNetwork.Network2;
 import org.terasology.blockNetwork.NetworkChangeReason;
-import org.terasology.blockNetwork.EfficientNetworkTopologyListener;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
