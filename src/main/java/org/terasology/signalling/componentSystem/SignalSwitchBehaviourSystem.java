@@ -23,7 +23,6 @@ import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.blockNetwork.BlockNetworkUtil;
-import org.terasology.blockNetwork.ImmutableBlockLocation;
 import org.terasology.engine.Time;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -39,6 +38,7 @@ import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
+import org.terasology.math.geom.ImmutableVector3i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
@@ -92,7 +92,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
 
-    private TObjectLongMap<ImmutableBlockLocation> gateLastSignalChangeTime = new TObjectLongHashMap<>();
+    private TObjectLongMap<ImmutableVector3i> gateLastSignalChangeTime = new TObjectLongHashMap<>();
 
     private long lastSignalCleanupExecuteTime;
 
@@ -127,7 +127,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             public void handleDelayedTrigger(String actionId, EntityRef entity) {
                 if (processOutputForNormalGate(entity)) {
                     BlockComponent block = entity.getComponent(BlockComponent.class);
-                    gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+                    gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
                 }
             }
         };
@@ -147,7 +147,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForRevertedGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
                         }
                     }
                 });
@@ -189,7 +189,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForSetResetGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableBlockLocation(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
                         }
                     }
                 });
@@ -220,7 +220,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private void deleteOldSignalChangesForGates() {
         long worldTime = time.getGameTimeInMs();
         if (lastSignalCleanupExecuteTime + SIGNAL_CLEANUP_INTERVAL < worldTime) {
-            final TObjectLongIterator<ImmutableBlockLocation> iterator = gateLastSignalChangeTime.iterator();
+            final TObjectLongIterator<ImmutableVector3i> iterator = gateLastSignalChangeTime.iterator();
             while (iterator.hasNext()) {
                 iterator.advance();
                 if (iterator.value() + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL < worldTime) {
@@ -457,7 +457,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             // Schedule for the gate to be looked either immediately (during "update" method) or at least
             // GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL from the time it has last changed, whichever is later
             long delay;
-            final ImmutableBlockLocation location = new ImmutableBlockLocation(entity.getComponent(BlockComponent.class).getPosition());
+            final ImmutableVector3i location = new ImmutableVector3i(entity.getComponent(BlockComponent.class).getPosition());
             if (gateLastSignalChangeTime.containsKey(location)) {
                 delay = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL - time.getGameTimeInMs();
             } else {

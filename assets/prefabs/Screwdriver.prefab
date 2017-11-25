@@ -2,7 +2,7 @@
     "parent": "engine:itemBase",
     "Item": {
         "name": "Screwdriver",
-        "icon": "Axe"
+        "icon": "engine:items#axe"
     },
     "Screwdriver": {}
 }
