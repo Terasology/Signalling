@@ -35,6 +35,9 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
 
     private long timeMs;
 
+    /**
+    * Initializes the program.
+    */
     @Override
     public void initialise() {
         WidgetUtil.trySubscribe(this, "delay-decrease", new ActivateEventListener() {
@@ -50,7 +53,14 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
             }
         });
     }
-
+    
+    /**
+    * Method sets UILabel called label equal to title parameter. If the entity's signal time delay component is not null,
+    * it sets timeMS to timeDelay.delaySetting.
+    *
+    * @param title The title associated the label.
+    * @param entity The entity being attached.
+    */
     public void attachToEntity(String title, EntityRef entity) {
         this.blockEntity = entity;
         UIText time = find("delay-value", UIText.class);
@@ -63,17 +73,29 @@ public class DelayConfigurationScreen extends CoreScreenLayer {
         }
     }
 
+    /**
+    * Sets the time to a specified value.
+    *
+    * @param timeToSet the time that should be set.
+    */
     private void setTime(long timeToSet) {
         timeMs = timeToSet;
         UIText time = find("delay-value", UIText.class);
         time.setText(String.valueOf(timeMs) + "ms");
         this.blockEntity.send(new SetSignalDelayEvent(timeMs));
     }
-
+    
+    /**
+    * Increases the time by DELAY_STEP.
+    */
     private void increase() {
         setTime(timeMs + DELAY_STEP);
     }
-
+    
+    /**
+    * This method decreases the time by comparing MINIMUM_DELAY and timeMS - DELAY_STEP. If the MINIMUM_DELAY value is greater,
+    * time is set to MINIMUM_DELAY. If timeMS - DELAY_STEP is greater, time is set to timeMS - DELAY_STEP.
+    */
     private void decrease() {
         setTime(Math.max(MINIMUM_DELAY, timeMs - DELAY_STEP));
     }
