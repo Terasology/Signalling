@@ -19,11 +19,12 @@ import org.terasology.entitySystem.Component;
 import org.terasology.world.block.ForceBlockActive;
 
 /**
+ *
+ * Responsible for keeping track of whether a TimeDelay in a Signal has been modified.
  * @author Marcin Sciesinski <marcins78@gmail.com>
+ *
+ */
  */
 @ForceBlockActive
 public class SignalTimeDelayModifiedComponent implements Component {
-    /**
-     * Responsible for keeping track of whether a TimeDelay in a Signal has been modified.
-     */
 }
