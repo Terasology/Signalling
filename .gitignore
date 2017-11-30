@@ -3,7 +3,7 @@ build.gradle
 
 # IntelliJ
 *.iml
-.idea/
+.idea
 
 # Eclipse
 .checkstyle
