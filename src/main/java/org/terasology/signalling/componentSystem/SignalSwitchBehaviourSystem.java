@@ -107,7 +107,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private Map<String, GateSignalChangeHandler> signalChangeHandlers = Maps.newHashMap();
 
     /**
-     * Initialises the SignalSwitchBehaviorSystem's fields.
+     * Prepares signalling related blocks and SignalChangeHandlers for later event handling.
+     * These are obtained from the BlockManager.class file and by overridding GateSignalChangeHandler, respectively.
      */
     @Override
     public void initialise() {
@@ -201,6 +202,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     /**
      * Updates the SignalSwitchBehaviorSystem.
      * Handles pressure plate events and deletes old signal gate signal changes.
+     * Removes a Pressure Plate without a player from the Hashset activatedPressurePlates, stopping its signal.
+     * Removes any Signal Changes that are at least GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL old from gateLastSignalChangeTime
      * @param delta The time in milliseconds since the last update
      */
     @Override
@@ -210,10 +213,11 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Stops a Producer from producing a signal if the event has the correct ActionId.
-     * @param event The DelayedActionTriggeredEvent that
-     * @param entity The entity that is producing the signal
-     * @param signalProducer The component of the entity producing the signal
+     * Event handler for when a delayed trigger fires with the intent to stop a producer's signal.
+     * Mainly used for buttons releasing after BUTTON_PRESS_TIME.
+     * @param event The DelayedActionTriggeredEvent that is stopping the producer's signal
+     * @param entity The entity (most likely a button) that is producing the signal
+     * @param signalProducer The signal producing component of the entity
      */
     @ReceiveEvent
     public void delayedTriggerOnProducer(DelayedActionTriggeredEvent event, EntityRef entity, SignalProducerComponent signalProducer) {
