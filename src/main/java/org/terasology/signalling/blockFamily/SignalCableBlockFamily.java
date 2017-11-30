@@ -27,7 +27,7 @@ import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockBuilderHelper;
 import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.family.MultiConnectBlockFamily;
+import org.terasology.world.block.family.MultiConnectFamily;
 import org.terasology.world.block.family.RegisterBlockFamily;
 import org.terasology.world.block.loader.BlockFamilyDefinition;
 import org.terasology.world.block.shapes.BlockShape;
@@ -36,7 +36,7 @@ import org.terasology.world.block.shapes.BlockShape;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterBlockFamily("cable")
-public class SignalCableBlockFamily extends MultiConnectBlockFamily {
+public class SignalCableBlockFamily extends MultiConnectFamily {
     public SignalCableBlockFamily(BlockFamilyDefinition definition, BlockShape shape, BlockBuilderHelper blockBuilder) {
         super(definition, shape, blockBuilder);
     }
