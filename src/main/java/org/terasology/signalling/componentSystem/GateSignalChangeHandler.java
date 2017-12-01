@@ -17,18 +17,22 @@ package org.terasology.signalling.componentSystem;
 
 import org.terasology.entitySystem.entity.EntityRef;
 
+/**
+ * A callback that is notified when an {@link EntityRef}'s state changes.
+ */
 public interface GateSignalChangeHandler {
     /**
      * Called when gate's incoming signal has been changed.
-     * @param entity
-     * @return If this method returns a non-null value, it will be scheduled using DelayManager with that actionId.
+     *
+     * @param entity The entity undergoing a gate signal change
      */
     void handleGateSignalChange(EntityRef entity);
 
     /**
      * Called when delayed trigger event is being called for this gate with the specified actionId.
-     * @param actionId
-     * @param entity
+     *
+     * @param actionId The type of action the entity has performed
+     * @param entity The entity performing the action
      */
     void handleDelayedTrigger(String actionId, EntityRef entity);
 }
