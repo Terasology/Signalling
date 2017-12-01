@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * A factory that produces {@link BlockFamily BlockFamilies}.
  */
 @RegisterBlockFamilyFactory("cable")
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -100,7 +100,14 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
     
     public SignalCableBlockFamilyFactory(){
     }
-    
+
+    /**
+     * Creates a new {@link BlockFamily} with a given set of definitions.
+     *
+     * @param definition
+     * @param blockBuilder
+     * @return A new {@link SignalUpdateFamily} with the given definitions, always non-null.
+     */
     @Override
     public BlockFamily createBlockFamily(BlockFamilyDefinition definition, BlockBuilderHelper blockBuilder) {
         TByteObjectMap<String>[] basicBlocks = new TByteObjectMap[7];
@@ -137,7 +144,14 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         return new SignalUpdateFamily(blockUri, definition.getCategories(),
                 archetypeBlock, blocksForConnections, (byte)63);
     }
-    
+
+    /**
+     * Links the given blocks together.
+     * <p>
+     * @param basicBlocks An array of blocks to
+     * @param index The index of the block to put a shape mapping
+     * @param connections
+     */
     private void addConnections(TByteObjectMap<String>[] basicBlocks, int index, String connections) {
         if (basicBlocks[index] == null) {
             basicBlocks[index] = new TByteObjectHashMap<>();
@@ -180,7 +194,13 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         }
         return null;
     }
-    
+
+    /**
+     * Processes updates for a given {@link BlockComponent}
+     *
+     * @param event A {@link OnBlockItemPlacedEvent} to fetch the {@link BlockComponent}
+     * @param entity An ignored entity
+     */
     @ReceiveEvent(components = {BlockItemComponent.class})
     public void onPlaceBlock(OnBlockItemPlaced event, EntityRef entity) {
         BlockComponent blockComponent = event.getPlacedBlock().getComponent(BlockComponent.class);
@@ -210,7 +230,7 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         }
     }
     
-    
+
     @Override
     public Set<String> getSectionNames() {
         return BLOCK_NAMES;
