@@ -108,7 +108,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Prepares signalling related blocks and SignalChangeHandlers for later event handling.
-     * These are obtained from the BlockManager.class file and by overridding GateSignalChangeHandler, respectively.
+     * These are obtained from an instance of {@link org.terasology.world.block.BlockManager} and by implementing {@link GateSignalChangeHandler}, respectively.
      */
     @Override
     public void initialise() {

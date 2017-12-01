@@ -18,8 +18,8 @@ package org.terasology.signalling.components;
 import org.terasology.entitySystem.Component;
 /**
  * Responsible for keeping track of the time delay in a signal
- * delaySetting is the amount of time it is being delayed in milliseconds
  */
 public class SignalTimeDelayComponent implements Component {
+    /** delaySetting is the amount of time it is being delayed in milliseconds */
     public long delaySetting;
 }
