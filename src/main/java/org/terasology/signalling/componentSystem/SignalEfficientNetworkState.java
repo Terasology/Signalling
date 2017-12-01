@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+/**
+ * A class that stores the states of {@link SignalNetworkNode}s.
+ */
 public class SignalEfficientNetworkState implements EfficientNetworkTopologyListener<SignalNetworkNode> {
     private Set<Network2<SignalNetworkNode>> networksToRecalculate = Sets.newHashSet();
     private Set<SignalNetworkNode> consumersToRecalculate = Sets.newHashSet();
@@ -41,6 +44,11 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
                 });
     }
 
+    /**
+     * Forces a recalculation for this SignalEfficientNetworkState's networks.
+     *
+     * @return A collection of {@link SignalNetworkNode nodes}.
+     */
     public Collection<Network2<SignalNetworkNode>> consumeNetworksToRecalculate() {
         Set<Network2<SignalNetworkNode>> result = networksToRecalculate;
         networksToRecalculate = Sets.newHashSet();
@@ -53,11 +61,23 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
         return Collections.unmodifiableCollection(result);
     }
 
+    /**
+     * Adds the given network to a set of networks to recalculate.
+     *
+     * @param network A network to eventually recalculate, must be non-null
+     * @param reason An ignored reason
+     */
     @Override
     public void networkAdded(Network2<SignalNetworkNode> network, NetworkChangeReason reason) {
         networksToRecalculate.add(network);
     }
 
+    /**
+     * Adds the nodes in the given network to a set to recalculate.
+     *
+     * @param network A network to eventually recalculate, must be non-null
+     * @param reason An ignored reason
+     */
     @Override
     public void networkRemoved(Network2<SignalNetworkNode> network, NetworkChangeReason reason) {
         for (SignalNetworkNode signalNetworkNode : getConsumersInNetwork(network)) {
@@ -65,16 +85,36 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
         }
     }
 
+    /**
+     * Adds the given network to a set of networks to recalculate.
+     *
+     * @param network A network to eventually recalculate, must be non-null
+     * @param reason An ignored reason
+     */
     @Override
     public void networkingNodesAdded(Network2<SignalNetworkNode> network, Set<SignalNetworkNode> networkingNodes, NetworkChangeReason reason) {
         networksToRecalculate.add(network);
     }
 
+    /**
+     * Adds the given network node to a set of networks to recalculate.
+     *
+     * @param network A network to eventually recalculate, must be non-null
+     * @param networkingNodes A set of ignored nodes
+     * @param reason An ignored reason
+     */
     @Override
     public void networkingNodesRemoved(Network2<SignalNetworkNode> network, Set<SignalNetworkNode> networkingNodes, NetworkChangeReason reason) {
         networksToRecalculate.add(network);
     }
 
+    /**
+     * Adds the given network node to a set of networks to recalculate.
+     *
+     * @param network A network to eventually recalculate, must be non-null
+     * @param reason An ignored reason
+     * @param leafNodes
+     */
     @Override
     public void leafNodesAdded(Network2<SignalNetworkNode> network, Set<SignalNetworkNode> leafNodes, NetworkChangeReason reason) {
         for (SignalNetworkNode modifiedLeafNode : leafNodes) {
@@ -86,6 +126,13 @@ public class SignalEfficientNetworkState implements EfficientNetworkTopologyList
         }
     }
 
+    /**
+     * Adds all the {@link SignalNetworkNode}s into a set of consumers to recalculate.
+     *
+     * @param network A network to add to a set of networks to recalculate if its type is a producer.
+     * @param leafNodes A set of nodes to extract types out of
+     * @param reason An ignored reason
+     */
     @Override
     public void leafNodesRemoved(Network2<SignalNetworkNode> network, Set<SignalNetworkNode> leafNodes, NetworkChangeReason reason) {
         for (SignalNetworkNode modifiedLeafNode : leafNodes) {
