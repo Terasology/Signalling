@@ -16,6 +16,10 @@
 package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.entity.EntityRef;
 
+/**
+ * A marker class that indicates if an {@link EntityRef} is rotatable by a screwdriver.
+ */
 public class RotateableByScrewdriverComponent implements Component {
 }
