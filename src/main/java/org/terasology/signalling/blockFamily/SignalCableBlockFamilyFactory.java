@@ -104,8 +104,8 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
     /**
      * Creates a new {@link BlockFamily} with a given set of definitions.
      *
-     * @param definition
-     * @param blockBuilder
+     * @param definition A definition to create blocks with
+     * @param blockBuilder A BlockBuilderHelper to create connections
      * @return A new {@link SignalUpdateFamily} with the given definitions, always non-null.
      */
     @Override
@@ -148,9 +148,9 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
     /**
      * Links the given blocks together.
      * <p>
-     * @param basicBlocks An array of blocks to
+     * @param basicBlocks An array of blocks to link
      * @param index The index of the block to put a shape mapping
-     * @param connections
+     * @param connections The connection type being added
      */
     private void addConnections(TByteObjectMap<String>[] basicBlocks, int index, String connections) {
         if (basicBlocks[index] == null) {
@@ -196,7 +196,7 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
     }
 
     /**
-     * Processes updates for a given {@link BlockComponent}
+     * Processes updates for a given {@link BlockComponent}'s neighbours when the block is placed.
      *
      * @param event A {@link OnBlockItemPlacedEvent} to fetch the {@link BlockComponent}
      * @param entity An ignored entity

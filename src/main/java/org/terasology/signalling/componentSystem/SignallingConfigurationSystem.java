@@ -28,7 +28,7 @@ import org.terasology.signalling.nui.DelayConfigurationScreen;
 import org.terasology.world.block.BlockComponent;
 
 /**
- * A system that handles
+ * A marker class that indicates a system that handles signalling configurations.
  */
 @RegisterSystem(RegisterMode.CLIENT)
 public class SignallingConfigurationSystem extends BaseComponentSystem {
