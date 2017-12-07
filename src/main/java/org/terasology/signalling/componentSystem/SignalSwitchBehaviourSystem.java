@@ -106,6 +106,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private Map<String, GateSignalChangeHandler> signalChangeHandlers = Maps.newHashMap();
 
+    /**
+     * Prepares signalling related blocks and SignalChangeHandlers for later event handling.
+     * These are obtained from an instance of {@link org.terasology.world.block.BlockManager} and by implementing {@link GateSignalChangeHandler}, respectively.
+     */
     @Override
     public void initialise() {
         final BlockManager blockManager = CoreRegistry.get(BlockManager.class);
@@ -195,12 +199,26 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                 });
     }
 
+    /**
+     * Updates the SignalSwitchBehaviorSystem.
+     * Handles pressure plate events and deletes old signal gate signal changes.
+     * Removes a Pressure Plate without a player from the Hashset activatedPressurePlates, stopping its signal.
+     * Removes any Signal Changes that are at least GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL old from gateLastSignalChangeTime
+     * @param delta The time in milliseconds since the last update
+     */
     @Override
     public void update(float delta) {
         handlePressurePlateEvents();
         deleteOldSignalChangesForGates();
     }
 
+    /**
+     * Event handler for when a delayed trigger fires with the intent to stop a producer's signal.
+     * Mainly used for buttons releasing after BUTTON_PRESS_TIME.
+     * @param event The DelayedActionTriggeredEvent that is stopping the producer's signal
+     * @param entity The entity (most likely a button) that is producing the signal
+     * @param signalProducer The signal producing component of the entity
+     */
     @ReceiveEvent
     public void delayedTriggerOnProducer(DelayedActionTriggeredEvent event, EntityRef entity, SignalProducerComponent signalProducer) {
         if (event.getActionId().equals(BUTTON_RELEASE_ID)) {
@@ -208,6 +226,12 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Handles a delayed trigger on a signal gate by calling the gate signal change handler of the given gate type.
+     * @param event The event, used to determine what action was performed
+     * @param entity The entity the action was performed on
+     * @param signalGate A SignalGate Component used to determine how to handle the action.
+     */
     @ReceiveEvent
     public void delayedTriggerOnSignalGate(DelayedActionTriggeredEvent event, EntityRef entity, SignalGateComponent signalGate) {
         String gateType = signalGate.gateType;
@@ -319,6 +343,14 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Delays an Entity's Signal upon receiving a SignalDelayEvent.
+     * <p>
+     * Updates the entity's SignalTimeDelayComponent  to the minimum of 500 and the entity.timeDelay
+     * Updates the SignalTimeDelayModified to record whether the SignalTimeDelay has been modified.
+     * @param event The SignalTimeDelay Component with the
+     * @param entity The entity whose signal is being delayed
+     */
     @ReceiveEvent(components = {BlockComponent.class, SignalTimeDelayComponent.class})
     public void configureTimeDelay(SetSignalDelayEvent event, EntityRef entity) {
         SignalTimeDelayComponent timeDelayComponent = entity.getComponent(SignalTimeDelayComponent.class);
@@ -332,6 +364,18 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Activates a producer
+     * If entity is a transformer, switch, limited switch, or button, the entity (producer)
+     * will start producing a signal.
+     * LimitedSwitch produces a signal strength 5.
+     * SignalSwitch produces an infinite signal strength.
+     * Button will produce an signal strength infinite signal strength, and stop after BUTTON_PRESS_TIME
+     * An activated transformer will increase the signal strength by 1, unless it is already equal to 10 or infinity,
+     * in which case it will stop producing a signal.
+     * @param event The ActivationEvent that activates the producer
+     * @param entity The producer to activate
+     */
     @ReceiveEvent(components = {BlockComponent.class, SignalProducerComponent.class})
     public void producerActivated(ActivateEvent event, EntityRef entity) {
         SignalProducerComponent producerComponent = entity.getComponent(SignalProducerComponent.class);
@@ -383,7 +427,13 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
-
+    /**
+     * Updates the consumer of a gate based on the gate's type.
+     * @param event The event caused by changing a component
+     * @param entity The gate to modify
+     * @param signalGate The SignalGate Component, used to determine the action performed.
+     * @param block
+     */
     @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
     public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate, BlockComponent block) {
         String gateType = signalGate.gateType;
@@ -393,6 +443,12 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Updates a Consumer of a signal based on a change to that signal.
+     * Example: Turning on and off a lamp.
+     * @param event The event modifying the consumer.
+     * @param entity The consumer to be updated.
+     */
     @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
     public void consumerModified(OnChangedComponent event, EntityRef entity) {
         if (entity.hasComponent(BlockComponent.class)) {
