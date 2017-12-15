@@ -3,7 +3,7 @@
     "version" : "0.1.1-SNAPSHOT",
     "author" : "Marcin Sciesinski <marcins78@gmail.com>",
     "displayName" : "Signalling framework",
-    "description" : "Mod containing block that allow to send signals to other blocks",
+    "description" : "Mod containing blocks that send signals to other blocks",
     "dependencies" : [
         {
             "id" : "BlockNetwork",
