@@ -17,5 +17,8 @@ package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * A component that indicates the {@link EntityRef} it is attached to is a screwdriver item.
+ */
 public class ScrewdriverComponent implements Component {
 }
