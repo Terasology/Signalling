@@ -26,6 +26,7 @@ public class SignalNetworkNode extends NetworkNode {
         PRODUCER, CONSUMER, CONDUCTOR
     }
 
+    // The node type
     private Type type;
 
     public SignalNetworkNode(Vector3i location, byte inputSides, byte outputSides, Type type) {
@@ -33,10 +34,16 @@ public class SignalNetworkNode extends NetworkNode {
         this.type = type;
     }
 
+    /**
+     * @return The type of node this node is. Can be any of {@link SignalNetworkNode.Type}
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     * @return True if the given object is the same node or a node of the same {@link SignalNetworkNode.Type}
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,6 +57,9 @@ public class SignalNetworkNode extends NetworkNode {
         return true;
     }
 
+    /**
+     * This is overridden to ensure that nodes of different types have different hashcodes
+     */
     @Override
     public int hashCode() {
         int result = super.hashCode();

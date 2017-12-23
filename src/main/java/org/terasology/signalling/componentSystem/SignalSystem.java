@@ -108,6 +108,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         signalNetwork = null;
     }
 
+    /**
+     * This method ensures that computers cannot be faster than the processing interval
+     */
     @Override
     public void update(float delta) {
         long worldTime = time.getGameTimeInMs();
@@ -171,6 +174,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Queries each node's Type to determine if it's a Consumer
+     * @param network The network to query for Consumers
+     * @return The consumers on the given network
+     */
     private Iterable<SignalNetworkNode> getConsumersInNetwork(Network2<SignalNetworkNode> network) {
         return Iterables.filter(network.getLeafNodes(),
                 new Predicate<SignalNetworkNode>() {
@@ -181,6 +189,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
                 });
     }
 
+    /**
+     * Queries each node's Type to determine if it's a Producer
+     * @param network The network to query for Producers
+     * @return The producers on the given network
+     */
     private Iterable<SignalNetworkNode> getProducersInNetwork(Network2<SignalNetworkNode> network) {
         return Iterables.filter(network.getLeafNodes(),
                 new Predicate<SignalNetworkNode>() {
@@ -191,6 +204,10 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
                 });
     }
 
+    /**
+     * Adds all networks that have a producer that is modified to the list of networks to be recalculated
+     * @param networksToRecalculate The list of networks that need to be recalculated
+     */
     private void appendNetworksContainingModifiedProducer(Set<Network2<SignalNetworkNode>> networksToRecalculate) {
         for (Network2<SignalNetworkNode> network : signalNetwork.getNetworks()) {
             if (!networksToRecalculate.contains(network)) {
@@ -215,6 +232,12 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Sends the correct signal to the correct entity based on the recieved signal
+     * @param networkSignals The signals in the network
+     * @param signalConsumerComponent The component of the gate receiving the signal
+     * @param entity The block to send the signal to
+     */
     private void processSignalConsumerResult(Collection<NetworkSignals> networkSignals, SignalConsumerComponent signalConsumerComponent, EntityRef entity) {
         final SignalConsumerComponent.Mode mode = signalConsumerComponent.mode;
         switch (mode) {
@@ -273,6 +296,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Detects a XOR signal based on the sides recieving a signal
+     * @param networkSignals The signals in the network
+     * @return True if the network has a XOR signal
+     */
     private boolean hasSignalForXor(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -295,6 +323,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return connected;
     }
 
+    /**
+     * Detects an AND signal based on sides receiving a signal
+     * @param networkSignals The signals in the network
+     * @return True if all sides are receiving a signal
+     */
     private boolean hasSignalForAnd(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -307,6 +340,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return true;
     }
 
+    /**
+     * Detects an OR signal based on sides receiving a signal
+     * @param networkSignals The signals in the network
+     * @return True if one or more sides are receiving a signal
+     */
     private boolean hasSignalForOr(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -319,7 +357,12 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return false;
     }
 
-    //
+    /**
+     * Passes on the most powerful of the signals in the given network. All of them if one signal has infinite strength.
+     * @param network The network to check for signals
+     * @param consumerNode The node receiving the signals
+     * @return The most powerful of the signals
+     */
     private NetworkSignals getConsumerSignalInNetwork(Network2<SignalNetworkNode> network, SignalNetworkNode consumerNode) {
         // Check for infinite signal strength (-1), if there - it powers whole network
         Iterable<SignalNetworkNode> producers = getProducersInNetwork(network);
@@ -349,6 +392,14 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return networkSignals;
     }
 
+    /**
+     * Checks for the most powerful signal on the network on a specific side and returns it
+     * @param network The network to check for signals
+     * @param consumerNode The node to check from
+     * @param producers The producers in the network
+     * @param sideInNetwork The side in question
+     * @return The most powerful signal on the side
+     */
     private int getMaxSignalInNetworkOnSide(Network2<SignalNetworkNode> network, SignalNetworkNode consumerNode, Iterable<SignalNetworkNode> producers, Side sideInNetwork) {
         int result = 0;
         for (SignalNetworkNode producer : producers) {
@@ -363,18 +414,38 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return result;
     }
 
+    /**
+     * Makes a node with the given specifications
+     * @param location The location of the node
+     * @param inputDefinedSides The sides to receive input
+     * @param outputDefinedSides The sides to make output
+     * @param type The {@link SignalNetworkNode.Type} the node should be
+     * @return A node with the given specifications
+     */
     private SignalNetworkNode toNode(Vector3i location, int inputDefinedSides, int outputDefinedSides, SignalNetworkNode.Type type) {
         return new SignalNetworkNode(location, getConnections(location, (byte) inputDefinedSides), getConnections(location, (byte) outputDefinedSides), type);
     }
 
+    /**
+     * Gets all the sides of the block that it is possible to connect to, input or output
+     * @param location The location of the block to get connections from
+     * @param definedSides The sides of the block that are defined as input or output
+     * @return The sides which it is possible to connect to
+     */
     private byte getConnections(Vector3i location, byte definedSides) {
         return BlockNetworkUtil.getResultConnections(worldProvider.getBlock(location), definedSides);
     }
 
+    /**
+     * Adds the placed block to the correct list
+     * @param event The event triggered by block placement
+     * @param entityRef The entity information of the placed block
+     */
     @ReceiveEvent()
     public void onBlockPlaced(OnBlockItemPlaced event, EntityRef entityRef) {
         EntityRef ref = event.getPlacedBlock();
         final Vector3i location = event.getPosition();
+        // This isn't used
         Block block = worldProvider.getBlock(location);
 
         if(ref.hasComponent(SignalConductorComponent.class)){
