@@ -36,6 +36,9 @@ import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 import java.util.EnumMap;
 
+/**
+ * Component system that handles {@link ScrewdriverComponent} actions.
+ */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class ScrewdriverSystem extends BaseComponentSystem {
     @In
@@ -55,6 +58,12 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         sideOrder.put(Side.BOTTOM, Side.FRONT);
     }
 
+    /**
+     * Event fired when a {@link ScrewdriverComponent} item is used on a {@link RotateableByScrewdriverComponent} entity.
+     *
+     * @param event The activation event holding the rotated target entity
+     * @param screwdriver The screwdriver item doing the rotating
+     */
     @ReceiveEvent(components = {ScrewdriverComponent.class})
     public void rotateGate(ActivateEvent event, EntityRef screwdriver) {
         final EntityRef target = event.getTarget();
@@ -84,6 +93,15 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Gets the next rotated version of the given block in its {@link RotationBlockFamily} assuming a clockwise rotation.
+     *
+     * @param rotationBlockFamily The BlockFamily that contains the various rotations of the target block
+     * @param currentBlock The block being rotated
+     * @param sideToRotateAround The target side of the block being rotated
+     *
+     * @return The next rotated block from the current block after a clockwise rotation.
+     */
     private Block getBlockForClockwiseRotation(RotationBlockFamily rotationBlockFamily, Block currentBlock, Side sideToRotateAround) {
         // This definitely can be done more efficiently, but I'm too lazy to figure it out and it's going to be
         // invoked once in a blue moon anyway, so we can do it the hard way
@@ -106,6 +124,13 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         return rotationBlockFamily.getBlockForRotation(resultRotation);
     }
 
+    /**
+     * Gets the corresponding side that should be rotated given a target side that should be rotated around.
+     *
+     * @param side the side the rotation is targetted around
+     *
+     * @return The side that should be rotated given the side the rotation is targeted around
+     */
     private SideMapping findSideMappingForSide(Side side) {
         switch (side) {
             case TOP:
@@ -123,6 +148,17 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Finds the rotation that would rotate the given original side to the relative result side,
+     * and the original left side to its result side.
+     *
+     * @param originalSide The pre-rotation side
+     * @param relativeSide The post-rotation target for the originalSide
+     * @param originalLeftSide The pre-rotation left side
+     * @param resultSide The post-rotation target for the originalLeftSide
+     *
+     * @return The rotation that transforms the given two original sides to the their respective resultant sides.
+     */
     private Rotation findDesiredRotation(Side originalSide, Side relativeSide, Side originalLeftSide, Side resultSide) {
         for (Rotation rotation : Rotation.values()) {
             if (rotation.rotate(originalSide) == relativeSide
@@ -133,6 +169,14 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         return null;
     }
 
+    /**
+     * Finds the original (pre-rotation) side for which the given rotation would have produced the result side.
+     *
+     * @param rotation The rotation that was applied to get the result side
+     * @param resultSide The rotated resultant side
+     *
+     * @return The original (pre-rotation) side for which the given rotation would have produced the result side.
+     */
     private Side findOriginalSide(Rotation rotation, Side resultSide) {
         for (Side side : Side.values()) {
             if (rotation.rotate(side) == resultSide) {
@@ -143,6 +187,9 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         return null;
     }
 
+    /**
+     * Represents a mapping from a block's original side to its rotated result block's corresponding side
+     */
     private static class SideMapping {
         private final Side originalSide;
         private final Side resultSide;

@@ -28,13 +28,18 @@ import org.terasology.signalling.nui.DelayConfigurationScreen;
 import org.terasology.world.block.BlockComponent;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * A marker class that indicates a system that handles signalling configurations.
  */
 @RegisterSystem(RegisterMode.CLIENT)
 public class SignallingConfigurationSystem extends BaseComponentSystem {
     @In
     private NUIManager nuiManager;
 
+    /**
+     * Attaches the given entity to this system's screen.
+     *
+     * @param entity An {@link EntityRef} to attach
+     */
     @ReceiveEvent(components = {BlockComponent.class, SignalTimeDelayComponent.class})
     public void openDelayConfiguration(ActivateEvent event, EntityRef entity) {
         nuiManager.toggleScreen("signalling:delayConfigurationScreen");

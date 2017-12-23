@@ -21,10 +21,17 @@ import org.terasology.world.block.RequiresBlockLifecycleEvents;
 
 import java.util.Set;
 
+/**
+ * A component that indicates the {@link EntityRef} it is attached to is a signal conductor.
+ * Holds information about conductor's input / output sides.
+ */
 @RequiresBlockLifecycleEvents
 public class SignalConductorComponent implements Component {
     public Set<ConnectionGroup> connectionGroups;
 
+    /**
+     * Maps a signal conductor entity's input / output sides.
+     */
     @MappedContainer
     public static class ConnectionGroup {
         public byte inputSides;
