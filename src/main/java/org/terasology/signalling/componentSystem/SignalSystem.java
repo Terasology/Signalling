@@ -15,10 +15,14 @@
  */
 package org.terasology.signalling.componentSystem;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.blockNetwork.BlockNetworkUtil;
@@ -47,17 +51,14 @@ import org.terasology.signalling.components.SignalProducerComponent;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.BeforeDeactivateBlocks;
-import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.OnActivatedBlocks;
 import org.terasology.world.block.items.OnBlockItemPlaced;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class SignalSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
@@ -108,12 +109,10 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         signalNetwork = null;
     }
 
-    /**
-     * This method ensures that computers cannot be faster than the processing interval
-     */
     @Override
     public void update(float delta) {
         long worldTime = time.getGameTimeInMs();
+        // Ensures that computers cannot be faster than the processing interval
         if (worldTime > lastUpdate + processingMinimumInterval) {
             lastUpdate = worldTime;
 
@@ -175,7 +174,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Queries each node's Type to determine if it's a Consumer
+     * Finds the consumers in a network
      * @param network The network to query for Consumers
      * @return The consumers on the given network
      */
@@ -190,7 +189,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Queries each node's Type to determine if it's a Producer
+     * Finds the producers in a network
      * @param network The network to query for Producers
      * @return The producers on the given network
      */
@@ -233,7 +232,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Sends the correct signal to the correct entity based on the recieved signal
+     * Sends the correct signal to the correct entity based on the received signal
      * @param networkSignals The signals in the network
      * @param signalConsumerComponent The component of the gate receiving the signal
      * @param entity The block to send the signal to
@@ -297,7 +296,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Detects a XOR signal based on the sides recieving a signal
+     * Detects a XOR signal based on the sides receiving a signal
      * @param networkSignals The signals in the network
      * @return True if the network has a XOR signal
      */
@@ -323,11 +322,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return connected;
     }
 
-    /**
-     * Detects an AND signal based on sides receiving a signal
-     * @param networkSignals The signals in the network
-     * @return True if all sides are receiving a signal
-     */
+    // Same as XOR but with AND
     private boolean hasSignalForAnd(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -340,11 +335,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return true;
     }
 
-    /**
-     * Detects an OR signal based on sides receiving a signal
-     * @param networkSignals The signals in the network
-     * @return True if one or more sides are receiving a signal
-     */
+    // Same as XOR but with OR
     private boolean hasSignalForOr(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -358,7 +349,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Passes on the most powerful of the signals in the given network. All of them if one signal has infinite strength.
+     * Passes on the most powerful of the signals in the given network. All of the signals if one signal has infinite strength.
      * @param network The network to check for signals
      * @param consumerNode The node receiving the signals
      * @return The most powerful of the signals
@@ -393,7 +384,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Checks for the most powerful signal on the network on a specific side and returns it
+     * Returns the most powerful signal on the network on a specific side
      * @param network The network to check for signals
      * @param consumerNode The node to check from
      * @param producers The producers in the network
@@ -445,8 +436,6 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     public void onBlockPlaced(OnBlockItemPlaced event, EntityRef entityRef) {
         EntityRef ref = event.getPlacedBlock();
         final Vector3i location = event.getPosition();
-        // This isn't used
-        Block block = worldProvider.getBlock(location);
 
         if(ref.hasComponent(SignalConductorComponent.class)){
             logger.debug("SignalConductor placed: " + ref.getParentPrefab());
