@@ -19,7 +19,6 @@ import org.terasology.blockNetwork.NetworkNode;
 import org.terasology.math.geom.Vector3i;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
  * Note that two nodes will be considered the same if their types are equal.
  */
 public class SignalNetworkNode extends NetworkNode {

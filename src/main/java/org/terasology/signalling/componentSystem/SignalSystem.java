@@ -349,7 +349,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Passes on the most powerful of the signals in the given network. All of the signals if one signal has infinite strength.
+     * Returns the most powerful signals in the given network.
+     * If there is a signal with infinite strength on the network, the whole network is returned.
      * @param network The network to check for signals
      * @param consumerNode The node receiving the signals
      * @return The most powerful of the signals
