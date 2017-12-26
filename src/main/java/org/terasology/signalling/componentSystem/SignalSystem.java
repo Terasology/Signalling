@@ -296,7 +296,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     }
 
     /**
-     * Detects a XOR signal based on the sides receiving a signal
+     * Used for the XOR signal block
      * @param networkSignals The signals in the network
      * @return True if the network has a XOR signal
      */
@@ -322,7 +322,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return connected;
     }
 
-    // Same as XOR but with AND
+    /**
+     * Used for the AND signal block
+     * @param networkSignals The signals in the network
+     * @return True if the network has a AND signal
+     */
     private boolean hasSignalForAnd(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
@@ -335,7 +339,11 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         return true;
     }
 
-    // Same as XOR but with OR
+    /**
+     * Used for the OR signal block
+     * @param networkSignals The signals in the network
+     * @return True if the network has a OR signal
+     */
     private boolean hasSignalForOr(Collection<NetworkSignals> networkSignals) {
         if (networkSignals == null) {
             return false;
