@@ -162,6 +162,14 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         }
     }
     
+    /**
+     * Creates a block for connection
+     * @param connections Cable connection
+     * @param blockBuilder Cable block builder
+     * @param definition Cable definition
+     * @param basicBlocks Cable basic blocks
+     * @return Cable block
+     */
     private Block constructBlockForConnections(final byte connections, final BlockBuilderHelper blockBuilder,
                                                BlockFamilyDefinition definition, TByteObjectMap<String>[] basicBlocks) {
         int connectionCount = SideBitFlag.getSides(connections).size();
@@ -179,6 +187,12 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         return null;
     }
     
+    /**
+     * Gets rotation to acheive or a null
+     * @param source Cable source
+     * @param target Cable target
+     * @return New rotation
+     */
     private Rotation getRotationToAchieve(byte source, byte target) {
         Collection<Side> originalSides = SideBitFlag.getSides(source);
         
@@ -212,6 +226,10 @@ public class SignalCableBlockFamilyFactory extends BaseComponentSystem implement
         processUpdateForBlockLocation(targetBlock);
     }
     
+    /**
+     * Process update for a block location
+     * @param blockLocation Vector block location
+     */
     private void processUpdateForBlockLocation(Vector3i blockLocation) {
         for (Side side : Side.values()) {
             Vector3i neighborLocation = new Vector3i(blockLocation);
