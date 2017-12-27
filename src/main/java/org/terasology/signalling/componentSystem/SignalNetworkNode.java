@@ -19,7 +19,7 @@ import org.terasology.blockNetwork.NetworkNode;
 import org.terasology.math.geom.Vector3i;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * Note that two nodes will be considered the same if their types are equal.
  */
 public class SignalNetworkNode extends NetworkNode {
     public enum Type {
@@ -33,6 +33,9 @@ public class SignalNetworkNode extends NetworkNode {
         this.type = type;
     }
 
+    /**
+     * @return Return the type of this Node. Can be any of {@link SignalNetworkNode.Type}
+     */
     public Type getType() {
         return type;
     }

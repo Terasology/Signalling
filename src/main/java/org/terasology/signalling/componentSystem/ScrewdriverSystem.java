@@ -46,8 +46,10 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     @In
     private BlockEntityRegistry blockEntityRegistry;
 
+    /** This map holds the order in which rotation should happen */
     private EnumMap<Side, Side> sideOrder = new EnumMap<>(Side.class);
 
+    /** Initializes the order of rotation */
     @Override
     public void initialise() {
         sideOrder.put(Side.FRONT, Side.LEFT);
