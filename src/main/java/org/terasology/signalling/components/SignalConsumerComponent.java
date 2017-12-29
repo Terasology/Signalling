@@ -23,14 +23,18 @@ import java.util.Set;
 
 /**
  * Indicates that an entity can recieve a signal
- * connectionSides represents which sides can be connected to
- * mode represents the operation used for a logic gate
  */
 @RequiresBlockLifecycleEvents
 public class SignalConsumerComponent implements Component {
+    /**
+     * Represents which sides can be connected to
+     */
     public byte connectionSides;
+    /**
+     * Represents the operation used for a logic gate
+     */
     public SignalConsumerComponent.Mode mode = Mode.AT_LEAST_ONE;
-
+    
     public enum Mode {
         AT_LEAST_ONE, ALL_CONNECTED, EXACTLY_ONE, SPECIAL
     }
