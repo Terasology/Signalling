@@ -20,6 +20,10 @@ import org.terasology.entitySystem.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Keeps track of the signal strength on each side of an entity
+ * -1 is infinite signal, 0 is no signal
+ */
 public class SignalConsumerAdvancedStatusComponent implements Component {
     public Map<String, Integer> signalStrengths = new HashMap<>();
 }
