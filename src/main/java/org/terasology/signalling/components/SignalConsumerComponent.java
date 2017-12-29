@@ -21,6 +21,11 @@ import org.terasology.world.block.RequiresBlockLifecycleEvents;
 
 import java.util.Set;
 
+/**
+ * Indicates that an entity can recieve a signal
+ * connectionSides represents which sides can be connected to
+ * mode represents the operation used for a logic gate
+ */
 @RequiresBlockLifecycleEvents
 public class SignalConsumerComponent implements Component {
     public byte connectionSides;
