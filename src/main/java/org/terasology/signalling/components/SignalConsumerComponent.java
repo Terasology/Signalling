@@ -22,12 +22,12 @@ import org.terasology.world.block.RequiresBlockLifecycleEvents;
 import java.util.Set;
 
 /**
- * Indicates that an entity can recieve a signal
+ * Indicates that an Entity can recieve a Signal
  */
 @RequiresBlockLifecycleEvents
 public class SignalConsumerComponent implements Component {
     /**
-     * Represents which sides can be connected to
+     * Represents which sides can be connected to, use the SideBitFlag class to interpret this value
      */
     public byte connectionSides;
     /**
