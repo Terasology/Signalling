@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * Keeps track of the signal strength on each side of an entity
+ * Used in SetResetGate
  */
 public class SignalConsumerAdvancedStatusComponent implements Component {
     /**
