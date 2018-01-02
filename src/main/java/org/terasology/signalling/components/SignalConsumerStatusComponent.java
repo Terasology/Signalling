@@ -17,6 +17,9 @@ package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * Keeps track of whether or not the entity is recieving a signal.
+ */
 public class SignalConsumerStatusComponent implements Component {
     public boolean hasSignal;
 }

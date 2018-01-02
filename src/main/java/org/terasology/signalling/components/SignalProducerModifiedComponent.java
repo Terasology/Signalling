@@ -18,6 +18,10 @@ package org.terasology.signalling.components;
 import org.terasology.entitySystem.Component;
 import org.terasology.world.block.ForceBlockActive;
 
+/**
+ * Responsible for keeping track of whether a signal producer has been modified.
+ * The presence or abscence of this component is used to store this data.
+ */
 @ForceBlockActive
 public class SignalProducerModifiedComponent implements Component {
 }
