@@ -26,13 +26,9 @@ import java.util.Set;
  */
 @RequiresBlockLifecycleEvents
 public class SignalConsumerComponent implements Component {
-    /**
-     * Represents which sides can be connected to, use the SideBitFlag class to interpret this value
-     */
+    //Represents which sides can be connected to, use the SideBitFlag class to interpret this value
     public byte connectionSides;
-    /**
-     * Represents the operation used for a logic gate
-     */
+    //Represents the operation used for a logic gate
     public SignalConsumerComponent.Mode mode = Mode.AT_LEAST_ONE;
     
     public enum Mode {
