@@ -25,6 +25,18 @@ import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponen
 
 import java.util.Map;
 
+/**
+ * Defines a computer module method that reads a signal from the specified side.
+ *
+ * Parameters:
+ *  direction
+ *  Type: Direction
+ *  Description: Direction from which to read the signal.
+ *
+ * Returns:
+ *  Type: Number
+ *  Description: Signal strength on that side: 0 means no signal on that side, -1 means infinite.
+ */
 public class ReadSignalMethod extends AbstractModuleMethodExecutable<Object> {
     private String methodName;
 
