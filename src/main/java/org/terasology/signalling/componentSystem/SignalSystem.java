@@ -60,6 +60,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+/**
+ * A system that manages networks of signal producers, conductors, and consumers.
+ *
+ * This system sends signals from producers to consumers via conductors at every update and also handles
+ * signalling events for {@link SignalProducerComponent}, {@link SignalConductorComponent}, and
+ * {@link SignalConsumerComponent}.
+ */
 @RegisterSystem(value = RegisterMode.AUTHORITY)
 public class SignalSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
@@ -120,6 +127,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Updates signals and their states in all signal networks and notifies consumers of any changes.
+     */
     private void updateSignals() {
         // Gather all networks that might have their signal state modified
         Set<Network2<SignalNetworkNode>> networksToRecalculate = Sets.newHashSet(signalNetworkState.consumeNetworksToRecalculate());
@@ -220,6 +230,14 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Removes the signals for a consumer which have gone stale. A stale network is that which is no longer
+     * active or does not contain the consumer.
+     *
+     * @param consumerToEvaluate The network node of the consumer with respect to which stale signals are
+     *                           evaluated.
+     * @param consumerSignals A mapping of the networks containing the consumer and the signals they contain.
+     */
     private void removeStaleSignals(SignalNetworkNode consumerToEvaluate, Map<Network2<SignalNetworkNode>, NetworkSignals> consumerSignals) {
         Iterator<Map.Entry<Network2<SignalNetworkNode>, NetworkSignals>> signalInNetworkIterator = consumerSignals.entrySet().iterator();
         while (signalInNetworkIterator.hasNext()) {
@@ -268,6 +286,14 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Sends a signal change to an advanced consumer represented by {@code entity}. This is done by
+     * updating the {@code signalStrengths} field of the {@link SignalConsumerAdvancedStatusComponent}
+     * on the {@code entity}.
+     *
+     * @param entity The consumer entity.
+     * @param networkSignals The signals in the network which are to be sent to the {@code entity}.
+     */
     private void outputSignalToAdvancedConsumer(EntityRef entity, Collection<NetworkSignals> networkSignals) {
         final SignalConsumerAdvancedStatusComponent advancedStatusComponent = entity.getComponent(SignalConsumerAdvancedStatusComponent.class);
         Map<String, Integer> signalResult = new HashMap<>();
@@ -284,6 +310,13 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         }
     }
 
+    /**
+     * Sends a signal change to a simple consumer represented by {@code entity}. This is done by updating the
+     * {@link SignalConsumerStatusComponent} on the {@code entity}.
+     *
+     * @param entity The consumer entity.
+     * @param result Whether a signal has been sent to the consumer or not.
+     */
     private void outputSignalToSimpleConsumer(EntityRef entity, boolean result) {
         final SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
         if (consumerStatusComponent.hasSignal != result) {
@@ -659,11 +692,20 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         consumerSignalInNetworks.remove(consumerNode);
     }
 
+    /**
+     * Represents a set of signals that belong to a network and their strengths.
+     */
     private final class NetworkSignals {
         private Map<Side, Integer> signalStrengths = new HashMap<>();
         private byte sidesWithSignal;
         private byte sidesWithoutSignal;
 
+        /**
+         * Adds a signal with the given strength which is emitted from the given {@link Side}.
+         *
+         * @param side The {@link Side} from which the signal is emitted.
+         * @param strength The strength of the signal.
+         */
         private void addSignal(Side side, int strength) {
             signalStrengths.put(side, strength);
             if (strength != 0) {
