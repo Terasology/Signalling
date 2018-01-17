@@ -62,11 +62,19 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * The system that manages switches and dictates their behaviour.
+ *
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
+    /**
+     * The time in ms it takes to change a signal for a gate.
+     */
     public static final int GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL = 500;
+    /**
+     * The time in ms it takes to register a button press.
+     */
     public static final int BUTTON_PRESS_TIME = 500;
 
     private static final String BUTTON_RELEASE_ID = "Signalling:ButtonRelease";
@@ -241,6 +249,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Deletes signal changes that have passed if the time since the last signal change cleanup is greater
+     * than {@link #SIGNAL_CLEANUP_INTERVAL}.
+     */
     private void deleteOldSignalChangesForGates() {
         long worldTime = time.getGameTimeInMs();
         if (lastSignalCleanupExecuteTime + SIGNAL_CLEANUP_INTERVAL < worldTime) {
@@ -255,6 +267,15 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Handles signal changes for a normal gate represented by {@code blockEntity}.
+     *
+     * A normal gate produces a signal if it has a signal. If it does not have a signal, signal
+     * production is stopped.
+     *
+     * @param blockEntity The normal gate entity.
+     * @return A boolean stating whether the signal change was done or not.
+     */
     private boolean processOutputForNormalGate(EntityRef blockEntity) {
         boolean hasSignal = blockEntity.getComponent(SignalConsumerStatusComponent.class).hasSignal;
         logger.debug("Processing gate, hasSignal=" + hasSignal);
@@ -265,6 +286,15 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Handles signal changes for a reverted gate represented by {@code blockEntity}.
+     *
+     * A reverted gate produces a signal if it does not have a signal. If it has a signal, signal
+     * production is stopped.
+     *
+     * @param blockEntity The reverted gate entity.
+     * @return A boolean stating whether the signal change was done or not.
+     */
     private boolean processOutputForRevertedGate(EntityRef blockEntity) {
         boolean hasSignal = blockEntity.getComponent(SignalConsumerStatusComponent.class).hasSignal;
         if (!hasSignal) {
@@ -274,6 +304,15 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Handles signal changes for a set reset gate represented by {@code blockEntity}.
+     *
+     * A set reset gate produces a signal if it has a signal in any of its set sides. However, if it has a
+     * signal in its reset side, signal production is stopped.
+     *
+     * @param blockEntity The set reset gate entity.
+     * @return A boolean stating whether the signal change was done or not.
+     */
     private boolean processOutputForSetResetGate(EntityRef blockEntity) {
         SignalGateComponent signalGateComponent = blockEntity.getComponent(SignalGateComponent.class);
         SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent = blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
@@ -311,6 +350,11 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         return false;
     }
 
+    /**
+     * Iterates through all characters and checks if they are standing on a pressure plate. If an entity
+     * with a {@link CharacterComponent} is standing on a pressure plate, the pressure plate starts
+     * producing a signal. If a character steps off a pressure plate, signal production is stopped.
+     */
     private void handlePressurePlateEvents() {
         Set<Vector3i> toRemoveSignal = Sets.newHashSet(activatedPressurePlates);
 
@@ -392,20 +436,63 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Flips the limited switch represented by {@code entity}.
+     *
+     * If the limited switch was previously off, it flips on and starts producing a finite strength
+     * signal of strength 5.
+     *
+     * If the limited switch was previously on, it flips off and signal production is stopped.
+     *
+     * @param entity The limited switch entity.
+     * @param producerComponent The {@link SignalProducerComponent} on the limited switch entity.
+     */
     private void signalLimitedSwitchActivated(EntityRef entity, SignalProducerComponent producerComponent) {
         switchFlipped(5, entity, producerComponent);
     }
 
+    /**
+     * Flips the switch represented by {@code entity}.
+     *
+     * If the switch was previously off, it flips on and starts producing a infinite strength
+     * signal.
+     *
+     * If the switch was previously on, it flips off and signal production is stopped.
+     *
+     * @param entity The switch entity.
+     * @param producerComponent The {@link SignalProducerComponent} on the switch entity.
+     */
     private void signalSwitchActivated(EntityRef entity, SignalProducerComponent producerComponent) {
         switchFlipped(-1, entity, producerComponent);
     }
 
+    /**
+     * Activates the button represented by {@code entity}.
+     *
+     * When activated, the button starts emitting an infinite signal and is "released" after a delay of
+     * {@link #BUTTON_PRESS_TIME} milliseconds.
+     *
+     * @param entity The button entity.
+     * @param producerComponent The {@link SignalProducerComponent} on the button entity.
+     */
     private void signalButtonActivated(EntityRef entity, SignalProducerComponent producerComponent) {
         delayManager.addDelayedAction(entity, BUTTON_RELEASE_ID, BUTTON_PRESS_TIME);
 
         startProducingSignal(entity, -1);
     }
 
+    /**
+     * Flips the switch represented by {@code entity}.
+     *
+     * If the switch was previously off, it flips on and starts producing a signal with strength
+     * {@code onSignalStrength}.
+     *
+     * If the switch was previously on, it flips off and signal production is stopped.
+     *
+     * @param onSignalStrength The strength of the signal produced when the switch is flipped on.
+     * @param entity The switch entity.
+     * @param producerComponent The {@link SignalProducerComponent} on the switch entity.
+     */
     private void switchFlipped(int onSignalStrength, EntityRef entity, SignalProducerComponent producerComponent) {
         int currentSignalStrength = producerComponent.signalStrength;
         if (currentSignalStrength == 0) {
@@ -415,6 +502,15 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Activates the transformer represented by {@code entity}.
+     *
+     * Upon activation, a transformer increases its signal strength by 1. However, if the signal strength is
+     * already 10 or infinite, signal production is stopped.
+     *
+     * @param entity The transformer entity.
+     * @param producerComponent The {@link SignalProducerComponent} on the transformer entity.
+     */
     private void signalTransformerActivated(EntityRef entity, SignalProducerComponent producerComponent) {
         int result = producerComponent.signalStrength + 1;
         if (result == 11) {
@@ -523,6 +619,13 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         }
     }
 
+    /**
+     * Starts production of a signal of given strength from the given entity.
+     *
+     * @param entity The signal producer entity.
+     * @param signalStrength The strength of the signal produced.
+     * @return A boolean stating whether a change to the {@link SignalProducerComponent} was actually made.
+     */
     private boolean startProducingSignal(EntityRef entity, int signalStrength) {
         final SignalProducerComponent producer = entity.getComponent(SignalProducerComponent.class);
         if (producer.signalStrength != signalStrength) {
@@ -534,6 +637,12 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         return false;
     }
 
+    /**
+     * Stops production of a signal from the given entity.
+     *
+     * @param entity The signal producer entity.
+     * @return A boolean stating whether a change to the {@link SignalProducerComponent} was actually made.
+     */
     private boolean stopProducingSignal(EntityRef entity) {
         SignalProducerComponent producer = entity.getComponent(SignalProducerComponent.class);
         if (producer.signalStrength != 0) {
