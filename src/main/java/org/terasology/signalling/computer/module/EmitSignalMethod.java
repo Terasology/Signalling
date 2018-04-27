@@ -30,6 +30,19 @@ import org.terasology.signalling.components.SignalProducerComponent;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Defines a computer module method that emits a signal from the specified sides.
+ *
+ * Parameters:
+ *  directions
+ *  Type: Array of Direction
+ *  Description: Directions from which to emit the signal.
+ *
+ *  values
+ *  Type: Number
+ *  Description: Value of the signal - any positive number for signal distance, or -1 for unlimited,
+ *               0 to reset signal.
+ */
 public class EmitSignalMethod extends AbstractModuleMethodExecutable<Object> {
     private String methodName;
 
