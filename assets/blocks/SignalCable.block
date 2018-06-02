@@ -4,7 +4,7 @@
         "prefab": "signalling:SignalCable"
     },
 
-    "rotation": "cable",
+    "family": "cable",
     "no_connections": {
         "shape": "signalling:NoCon"
     },
