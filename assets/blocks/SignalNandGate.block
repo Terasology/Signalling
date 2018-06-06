@@ -1,6 +1,6 @@
 {
     "displayName": "Signal NAND Gate",
-    "rotation": "fullRotation",
+    "family": "fullRotation",
     "tiles": {
         "all": "signalling:SignalNandGate",
         "front": "signalling:SignalOutput",

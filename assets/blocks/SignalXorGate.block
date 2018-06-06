@@ -1,6 +1,6 @@
 {
     "displayName": "Signal XOR Gate",
-    "rotation": "fullRotation",
+    "family": "fullRotation",
     "tiles": {
         "all": "signalling:SignalXorGate",
         "front": "signalling:SignalOutput",

@@ -1,6 +1,6 @@
 {
     "displayName": "Signal OR Gate",
-    "rotation": "fullRotation",
+    "family": "fullRotation",
     "tiles": {
         "all": "signalling:SignalOrGate",
         "front": "signalling:SignalOutput",

@@ -1,6 +1,6 @@
 {
     "displayName": "Signal Set/Reset Gate",
-    "rotation": "horizontal",
+    "family": "horizontal",
     "tiles": {
         "all": "signalling:SignalSet",
         "back": "signalling:SignalReset",

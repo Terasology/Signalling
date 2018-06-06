@@ -1,6 +1,6 @@
 {
     "displayName": "Signal AND Gate",
-    "rotation": "fullRotation",
+    "family": "fullRotation",
     "tiles": {
         "all": "signalling:SignalAndGate",
         "front": "signalling:SignalOutput",

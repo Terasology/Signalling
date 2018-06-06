@@ -1,6 +1,6 @@
 {
     "displayName": "Signal On Delay Timer",
-    "rotation": "fullRotation",
+    "family": "fullRotation",
     "tiles": {
         "all": "signalling:SignalOnDelayGate",
         "front": "signalling:SignalOutput"
