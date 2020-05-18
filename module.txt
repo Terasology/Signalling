@@ -5,8 +5,8 @@
     "displayName": "Signalling framework",
     "description": "Mod containing blocks that send signals to other blocks",
     "dependencies": [
-        { "id": "BlockNetwork", "minVersion": "0.1.0" },
-        { "id": "ModularComputers", "minVersion": "0.1.0" }
+        { "id": "BlockNetwork", "minVersion": "1.0.0" },
+        { "id": "ModularComputers", "minVersion": "1.0.0" }
     ],
     "isServerSideOnly": false,
     "isLibrary": true,
