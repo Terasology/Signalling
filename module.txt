@@ -6,6 +6,8 @@
     "description": "Mod containing blocks that send signals to other blocks",
     "dependencies": [
         { "id": "BlockNetwork", "minVersion": "1.0.0" },
+        { "id": "Inventory", "minVersion": "1.1.0" },
+        { "id": "MobileBlocks", "minVersion": "1.0.0" },
         { "id": "ModularComputers", "minVersion": "1.0.0" }
     ],
     "isServerSideOnly": false,
