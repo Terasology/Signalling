@@ -1,18 +1,5 @@
-/*
- * Copyright 2015 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.componentSystem;
 
 import com.google.common.collect.Maps;
@@ -23,26 +10,31 @@ import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.blockNetwork.BlockNetworkUtil;
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnChangedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.logic.characters.CharacterComponent;
-import org.terasology.logic.common.ActivateEvent;
-import org.terasology.logic.delay.DelayManager;
-import org.terasology.logic.delay.DelayedActionTriggeredEvent;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Side;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnChangedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.logic.characters.CharacterComponent;
+import org.terasology.engine.logic.common.ActivateEvent;
+import org.terasology.engine.logic.delay.DelayManager;
+import org.terasology.engine.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.engine.world.block.BlockManager;
 import org.terasology.math.geom.ImmutableVector3i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalConsumerStatusComponent;
@@ -52,11 +44,6 @@ import org.terasology.signalling.components.SignalProducerModifiedComponent;
 import org.terasology.signalling.components.SignalTimeDelayComponent;
 import org.terasology.signalling.components.SignalTimeDelayModifiedComponent;
 import org.terasology.signalling.nui.SetSignalDelayEvent;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockManager;
 
 import java.util.Map;
 import java.util.Set;
@@ -85,7 +72,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private static final Logger logger = LoggerFactory.getLogger(SignalSystem.class);
     private static final long SIGNAL_CLEANUP_INTERVAL = 10000;
-
+    private final Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
+    private final TObjectLongMap<ImmutableVector3i> gateLastSignalChangeTime = new TObjectLongHashMap<>();
+    private final Map<String, GateSignalChangeHandler> signalChangeHandlers = Maps.newHashMap();
     @In
     private Time time;
     @In
@@ -96,14 +85,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private BlockEntityRegistry blockEntityRegistry;
     @In
     private DelayManager delayManager;
-
-
-    private Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
-
-    private TObjectLongMap<ImmutableVector3i> gateLastSignalChangeTime = new TObjectLongHashMap<>();
-
     private long lastSignalCleanupExecuteTime;
-
     private Block lampTurnedOff;
     private Block lampTurnedOn;
     private Block signalTransformer;
@@ -112,11 +94,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private Block signalLimitedSwitch;
     private Block signalButton;
 
-    private Map<String, GateSignalChangeHandler> signalChangeHandlers = Maps.newHashMap();
-
     /**
-     * Prepares signalling related blocks and SignalChangeHandlers for later event handling.
-     * These are obtained from an instance of {@link org.terasology.world.block.BlockManager} and by implementing {@link GateSignalChangeHandler}, respectively.
+     * Prepares signalling related blocks and SignalChangeHandlers for later event handling. These are obtained from an
+     * instance of {@link org.terasology.world.block.BlockManager} and by implementing {@link GateSignalChangeHandler},
+     * respectively.
      */
     @Override
     public void initialise() {
@@ -159,7 +140,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForRevertedGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()),
+                                    time.getGameTimeInMs());
                         }
                     }
                 });
@@ -167,7 +149,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                 new GateSignalChangeHandler() {
                     @Override
                     public void handleGateSignalChange(EntityRef entity) {
-                        SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
+                        SignalConsumerStatusComponent consumerStatusComponent =
+                                entity.getComponent(SignalConsumerStatusComponent.class);
                         signalChangedForDelayOnGate(entity, consumerStatusComponent);
                     }
 
@@ -181,7 +164,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                 new GateSignalChangeHandler() {
                     @Override
                     public void handleGateSignalChange(EntityRef entity) {
-                        SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
+                        SignalConsumerStatusComponent consumerStatusComponent =
+                                entity.getComponent(SignalConsumerStatusComponent.class);
                         signalChangedForDelayOffGate(entity, consumerStatusComponent);
                     }
 
@@ -201,17 +185,18 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForSetResetGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()),
+                                    time.getGameTimeInMs());
                         }
                     }
                 });
     }
 
     /**
-     * Updates the SignalSwitchBehaviorSystem.
-     * Handles pressure plate events and deletes old signal gate signal changes.
-     * Removes a Pressure Plate without a player from the Hashset activatedPressurePlates, stopping its signal.
-     * Removes any Signal Changes that are at least GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL old from gateLastSignalChangeTime
+     * Updates the SignalSwitchBehaviorSystem. Handles pressure plate events and deletes old signal gate signal changes.
+     * Removes a Pressure Plate without a player from the Hashset activatedPressurePlates, stopping its signal. Removes
+     * any Signal Changes that are at least GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL old from gateLastSignalChangeTime
+     *
      * @param delta The time in milliseconds since the last update
      */
     @Override
@@ -221,14 +206,16 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Event handler for when a delayed trigger fires with the intent to stop a producer's signal.
-     * Mainly used for buttons releasing after BUTTON_PRESS_TIME.
+     * Event handler for when a delayed trigger fires with the intent to stop a producer's signal. Mainly used for
+     * buttons releasing after BUTTON_PRESS_TIME.
+     *
      * @param event The DelayedActionTriggeredEvent that is stopping the producer's signal
      * @param entity The entity (most likely a button) that is producing the signal
      * @param signalProducer The signal producing component of the entity
      */
     @ReceiveEvent
-    public void delayedTriggerOnProducer(DelayedActionTriggeredEvent event, EntityRef entity, SignalProducerComponent signalProducer) {
+    public void delayedTriggerOnProducer(DelayedActionTriggeredEvent event, EntityRef entity,
+                                         SignalProducerComponent signalProducer) {
         if (event.getActionId().equals(BUTTON_RELEASE_ID)) {
             stopProducingSignal(entity);
         }
@@ -236,12 +223,14 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Handles a delayed trigger on a signal gate by calling the gate signal change handler of the given gate type.
+     *
      * @param event The event, used to determine what action was performed
      * @param entity The entity the action was performed on
      * @param signalGate A SignalGate Component used to determine how to handle the action.
      */
     @ReceiveEvent
-    public void delayedTriggerOnSignalGate(DelayedActionTriggeredEvent event, EntityRef entity, SignalGateComponent signalGate) {
+    public void delayedTriggerOnSignalGate(DelayedActionTriggeredEvent event, EntityRef entity,
+                                           SignalGateComponent signalGate) {
         String gateType = signalGate.gateType;
         GateSignalChangeHandler gateSignalChangeHandler = signalChangeHandlers.get(gateType);
         if (gateSignalChangeHandler != null) {
@@ -250,8 +239,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Deletes signal changes that have passed if the time since the last signal change cleanup is greater
-     * than {@link #SIGNAL_CLEANUP_INTERVAL}.
+     * Deletes signal changes that have passed if the time since the last signal change cleanup is greater than {@link
+     * #SIGNAL_CLEANUP_INTERVAL}.
      */
     private void deleteOldSignalChangesForGates() {
         long worldTime = time.getGameTimeInMs();
@@ -269,9 +258,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Handles signal changes for a normal gate represented by {@code blockEntity}.
-     *
-     * A normal gate produces a signal if it has a signal. If it does not have a signal, signal
-     * production is stopped.
+     * <p>
+     * A normal gate produces a signal if it has a signal. If it does not have a signal, signal production is stopped.
      *
      * @param blockEntity The normal gate entity.
      * @return A boolean stating whether the signal change was done or not.
@@ -288,9 +276,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Handles signal changes for a reverted gate represented by {@code blockEntity}.
-     *
-     * A reverted gate produces a signal if it does not have a signal. If it has a signal, signal
-     * production is stopped.
+     * <p>
+     * A reverted gate produces a signal if it does not have a signal. If it has a signal, signal production is
+     * stopped.
      *
      * @param blockEntity The reverted gate entity.
      * @return A boolean stating whether the signal change was done or not.
@@ -306,19 +294,21 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Handles signal changes for a set reset gate represented by {@code blockEntity}.
-     *
-     * A set reset gate produces a signal if it has a signal in any of its set sides. However, if it has a
-     * signal in its reset side, signal production is stopped.
+     * <p>
+     * A set reset gate produces a signal if it has a signal in any of its set sides. However, if it has a signal in its
+     * reset side, signal production is stopped.
      *
      * @param blockEntity The set reset gate entity.
      * @return A boolean stating whether the signal change was done or not.
      */
     private boolean processOutputForSetResetGate(EntityRef blockEntity) {
         SignalGateComponent signalGateComponent = blockEntity.getComponent(SignalGateComponent.class);
-        SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent = blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
+        SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent =
+                blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
         Block block = blockEntity.getComponent(BlockComponent.class).getBlock();
         Side resetSide = signalGateComponent.functionalSides.get(0);
-        Integer resetSignal = consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, resetSide).name());
+        Integer resetSignal =
+                consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, resetSide).name());
 
         SignalProducerComponent producerComponent = blockEntity.getComponent(SignalProducerComponent.class);
         int resultSignal = producerComponent.signalStrength;
@@ -328,7 +318,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             int size = signalGateComponent.functionalSides.size();
             for (int i = 1; i < size; i++) {
                 Side setSide = signalGateComponent.functionalSides.get(i);
-                Integer setSignal = consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, setSide).name());
+                Integer setSignal =
+                        consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block,
+                                setSide).name());
                 if (setSignal != null && setSignal != 0) {
                     resultSignal = -1;
                     break;
@@ -351,9 +343,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Iterates through all characters and checks if they are standing on a pressure plate. If an entity
-     * with a {@link CharacterComponent} is standing on a pressure plate, the pressure plate starts
-     * producing a signal. If a character steps off a pressure plate, signal production is stopped.
+     * Iterates through all characters and checks if they are standing on a pressure plate. If an entity with a {@link
+     * CharacterComponent} is standing on a pressure plate, the pressure plate starts producing a signal. If a character
+     * steps off a pressure plate, signal production is stopped.
      */
     private void handlePressurePlateEvents() {
         Set<Vector3i> toRemoveSignal = Sets.newHashSet(activatedPressurePlates);
@@ -361,11 +353,13 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         Iterable<EntityRef> players = entityManager.getEntitiesWith(CharacterComponent.class, LocationComponent.class);
         for (EntityRef player : players) {
             Vector3f playerLocation = player.getComponent(LocationComponent.class).getWorldPosition();
-            Vector3i locationBeneathPlayer = new Vector3i(playerLocation.x + 0.5f, playerLocation.y - 0.5f, playerLocation.z + 0.5f);
+            Vector3i locationBeneathPlayer = new Vector3i(playerLocation.x + 0.5f, playerLocation.y - 0.5f,
+                    playerLocation.z + 0.5f);
             Block blockBeneathPlayer = worldProvider.getBlock(locationBeneathPlayer);
             if (blockBeneathPlayer == signalPressurePlate) {
                 EntityRef entityBeneathPlayer = blockEntityRegistry.getBlockEntityAt(locationBeneathPlayer);
-                SignalProducerComponent signalProducer = entityBeneathPlayer.getComponent(SignalProducerComponent.class);
+                SignalProducerComponent signalProducer =
+                        entityBeneathPlayer.getComponent(SignalProducerComponent.class);
                 if (signalProducer != null) {
                     if (signalProducer.signalStrength == 0) {
                         startProducingSignal(entityBeneathPlayer, -1);
@@ -390,8 +384,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     /**
      * Delays an Entity's Signal upon receiving a SignalDelayEvent.
      * <p>
-     * Updates the entity's SignalTimeDelayComponent  to the minimum of 500 and the entity.timeDelay
-     * Updates the SignalTimeDelayModified to record whether the SignalTimeDelay has been modified.
+     * Updates the entity's SignalTimeDelayComponent  to the minimum of 500 and the entity.timeDelay Updates the
+     * SignalTimeDelayModified to record whether the SignalTimeDelay has been modified.
+     *
      * @param event The SignalTimeDelay Component with the
      * @param entity The entity whose signal is being delayed
      */
@@ -409,14 +404,12 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Activates a producer
-     * If entity is a transformer, switch, limited switch, or button, the entity (producer)
-     * will start producing a signal.
-     * LimitedSwitch produces a signal strength 5.
-     * SignalSwitch produces an infinite signal strength.
-     * Button will produce an signal strength infinite signal strength, and stop after BUTTON_PRESS_TIME
-     * An activated transformer will increase the signal strength by 1, unless it is already equal to 10 or infinity,
-     * in which case it will stop producing a signal.
+     * Activates a producer If entity is a transformer, switch, limited switch, or button, the entity (producer) will
+     * start producing a signal. LimitedSwitch produces a signal strength 5. SignalSwitch produces an infinite signal
+     * strength. Button will produce an signal strength infinite signal strength, and stop after BUTTON_PRESS_TIME An
+     * activated transformer will increase the signal strength by 1, unless it is already equal to 10 or infinity, in
+     * which case it will stop producing a signal.
+     *
      * @param event The ActivationEvent that activates the producer
      * @param entity The producer to activate
      */
@@ -438,10 +431,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Flips the limited switch represented by {@code entity}.
-     *
-     * If the limited switch was previously off, it flips on and starts producing a finite strength
-     * signal of strength 5.
-     *
+     * <p>
+     * If the limited switch was previously off, it flips on and starts producing a finite strength signal of strength
+     * 5.
+     * <p>
      * If the limited switch was previously on, it flips off and signal production is stopped.
      *
      * @param entity The limited switch entity.
@@ -453,10 +446,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Flips the switch represented by {@code entity}.
-     *
-     * If the switch was previously off, it flips on and starts producing a infinite strength
-     * signal.
-     *
+     * <p>
+     * If the switch was previously off, it flips on and starts producing a infinite strength signal.
+     * <p>
      * If the switch was previously on, it flips off and signal production is stopped.
      *
      * @param entity The switch entity.
@@ -468,9 +460,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Activates the button represented by {@code entity}.
-     *
-     * When activated, the button starts emitting an infinite signal and is "released" after a delay of
-     * {@link #BUTTON_PRESS_TIME} milliseconds.
+     * <p>
+     * When activated, the button starts emitting an infinite signal and is "released" after a delay of {@link
+     * #BUTTON_PRESS_TIME} milliseconds.
      *
      * @param entity The button entity.
      * @param producerComponent The {@link SignalProducerComponent} on the button entity.
@@ -483,10 +475,10 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Flips the switch represented by {@code entity}.
-     *
-     * If the switch was previously off, it flips on and starts producing a signal with strength
-     * {@code onSignalStrength}.
-     *
+     * <p>
+     * If the switch was previously off, it flips on and starts producing a signal with strength {@code
+     * onSignalStrength}.
+     * <p>
      * If the switch was previously on, it flips off and signal production is stopped.
      *
      * @param onSignalStrength The strength of the signal produced when the switch is flipped on.
@@ -504,9 +496,9 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Activates the transformer represented by {@code entity}.
-     *
-     * Upon activation, a transformer increases its signal strength by 1. However, if the signal strength is
-     * already 10 or infinite, signal production is stopped.
+     * <p>
+     * Upon activation, a transformer increases its signal strength by 1. However, if the signal strength is already 10
+     * or infinite, signal production is stopped.
      *
      * @param entity The transformer entity.
      * @param producerComponent The {@link SignalProducerComponent} on the transformer entity.
@@ -525,13 +517,15 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Updates the consumer of a gate based on the gate's type.
+     *
      * @param event The event caused by changing a component
      * @param entity The gate to modify
      * @param signalGate The SignalGate Component, used to determine the action performed.
      * @param block
      */
     @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
-    public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate, BlockComponent block) {
+    public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate,
+                                     BlockComponent block) {
         String gateType = signalGate.gateType;
         GateSignalChangeHandler gateSignalChangeHandler = signalChangeHandlers.get(gateType);
         if (gateSignalChangeHandler != null) {
@@ -540,15 +534,16 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     }
 
     /**
-     * Updates a Consumer of a signal based on a change to that signal.
-     * Example: Turning on and off a lamp.
+     * Updates a Consumer of a signal based on a change to that signal. Example: Turning on and off a lamp.
+     *
      * @param event The event modifying the consumer.
      * @param entity The consumer to be updated.
      */
     @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
     public void consumerModified(OnChangedComponent event, EntityRef entity) {
         if (entity.hasComponent(BlockComponent.class)) {
-            SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
+            SignalConsumerStatusComponent consumerStatusComponent =
+                    entity.getComponent(SignalConsumerStatusComponent.class);
             Vector3i blockLocation = new Vector3i(entity.getComponent(BlockComponent.class).getPosition());
             Block block = worldProvider.getBlock(blockLocation);
 
@@ -609,7 +604,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             // Schedule for the gate to be looked either immediately (during "update" method) or at least
             // GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL from the time it has last changed, whichever is later
             long delay;
-            final ImmutableVector3i location = new ImmutableVector3i(entity.getComponent(BlockComponent.class).getPosition());
+            final ImmutableVector3i location =
+                    new ImmutableVector3i(entity.getComponent(BlockComponent.class).getPosition());
             if (gateLastSignalChangeTime.containsKey(location)) {
                 delay = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL - time.getGameTimeInMs();
             } else {

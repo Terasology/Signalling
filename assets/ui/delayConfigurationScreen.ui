@@ -1,54 +1,60 @@
 {
-    "type": "signalling:delayConfigurationScreen",
-    "skin": "engine:default",
-    "contents": {
-        "type": "relativeLayout",
-        "contents": [
+  "type": "signalling:delayConfigurationScreen",
+  "skin": "engine:default",
+  "contents": {
+    "type": "relativeLayout",
+    "contents": [
+      {
+        "type": "UIBox",
+        "layoutInfo": {
+          "width": 500,
+          "use-content-height": true,
+          "position-horizontal-center": {},
+          "position-vertical-center": {}
+        },
+        "content": {
+          "type": "ColumnLayout",
+          "columns": 3,
+          "verticalSpacing": 20,
+          "horizontalSpacing": 20,
+          "contents": [
             {
-                "type": "UIBox",
-                "layoutInfo": {
-                    "width": 500,
-                    "use-content-height": true,
-                    "position-horizontal-center": {},
-                    "position-vertical-center": {}
-                },
-                "content": {
-                    "type": "ColumnLayout",
-                    "columns": 3,
-                    "verticalSpacing": 20,
-                    "horizontalSpacing": 20,
-                    "contents": [
-                        {
-                            "type": "UISpace",
-                            "size": [1, 16]
-                        },
-                        {
-                            "type": "UILabel",
-                            "text": "[text]",
-                            "id": "delay-title"
-                        },
-                        {
-                            "type": "UISpace",
-                            "size": [1, 16]
-                        },
-                        {
-                            "type": "UIButton",
-                            "text": "<",
-                            "id": "delay-decrease"
-                        },
-                        {
-                            "type": "UIText",
-                            "text": "[value]",
-                            "id": "delay-value"
-                        },
-                        {
-                            "type": "UIButton",
-                            "text": ">",
-                            "id": "delay-increase"
-                        }
-                    ]
-                }
+              "type": "UISpace",
+              "size": [
+                1,
+                16
+              ]
+            },
+            {
+              "type": "UILabel",
+              "text": "[text]",
+              "id": "delay-title"
+            },
+            {
+              "type": "UISpace",
+              "size": [
+                1,
+                16
+              ]
+            },
+            {
+              "type": "UIButton",
+              "text": "<",
+              "id": "delay-decrease"
+            },
+            {
+              "type": "UIText",
+              "text": "[value]",
+              "id": "delay-value"
+            },
+            {
+              "type": "UIButton",
+              "text": ">",
+              "id": "delay-increase"
             }
-        ]
-    }
+          ]
+        }
+      }
+    ]
+  }
 }

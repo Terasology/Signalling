@@ -1,38 +1,25 @@
-/*
- * Copyright 2015 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.componentSystem;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.common.ActivateEvent;
 import org.terasology.blockNetwork.block.family.RotationBlockFamily;
-import org.terasology.math.Rotation;
-import org.terasology.math.Side;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.common.ActivateEvent;
+import org.terasology.engine.math.Rotation;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.family.BlockFamily;
+import org.terasology.engine.world.block.family.SideDefinedBlockFamily;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.registry.In;
 import org.terasology.signalling.components.RotateableByScrewdriverComponent;
 import org.terasology.signalling.components.ScrewdriverComponent;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.family.BlockFamily;
-import org.terasology.world.block.family.SideDefinedBlockFamily;
 
 import java.util.EnumMap;
 
@@ -41,15 +28,18 @@ import java.util.EnumMap;
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class ScrewdriverSystem extends BaseComponentSystem {
+    /**
+     * This map holds the order in which rotation should happen
+     */
+    private final EnumMap<Side, Side> sideOrder = new EnumMap<>(Side.class);
     @In
     private WorldProvider worldProvider;
     @In
     private BlockEntityRegistry blockEntityRegistry;
 
-    /** This map holds the order in which rotation should happen */
-    private EnumMap<Side, Side> sideOrder = new EnumMap<>(Side.class);
-
-    /** Initializes the order of rotation */
+    /**
+     * Initializes the order of rotation
+     */
     @Override
     public void initialise() {
         sideOrder.put(Side.FRONT, Side.LEFT);
@@ -61,7 +51,8 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     }
 
     /**
-     * Event fired when a {@link ScrewdriverComponent} item is used on a {@link RotateableByScrewdriverComponent} entity.
+     * Event fired when a {@link ScrewdriverComponent} item is used on a {@link RotateableByScrewdriverComponent}
+     * entity.
      *
      * @param event The activation event holding the rotated target entity
      * @param screwdriver The screwdriver item doing the rotating
@@ -96,15 +87,16 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     }
 
     /**
-     * Gets the next rotated version of the given block in its {@link RotationBlockFamily} assuming a clockwise rotation.
+     * Gets the next rotated version of the given block in its {@link RotationBlockFamily} assuming a clockwise
+     * rotation.
      *
      * @param rotationBlockFamily The BlockFamily that contains the various rotations of the target block
      * @param currentBlock The block being rotated
      * @param sideToRotateAround The target side of the block being rotated
-     *
      * @return The next rotated block from the current block after a clockwise rotation.
      */
-    private Block getBlockForClockwiseRotation(RotationBlockFamily rotationBlockFamily, Block currentBlock, Side sideToRotateAround) {
+    private Block getBlockForClockwiseRotation(RotationBlockFamily rotationBlockFamily, Block currentBlock,
+                                               Side sideToRotateAround) {
         // This definitely can be done more efficiently, but I'm too lazy to figure it out and it's going to be
         // invoked once in a blue moon anyway, so we can do it the hard way
         Rotation currentRotation = rotationBlockFamily.getRotation(currentBlock);
@@ -121,7 +113,8 @@ public class ScrewdriverSystem extends BaseComponentSystem {
         // This is the side we want the leftRelativeToEndUpAt
         Side resultRotatedSide = sideMapping.resultSide;
 
-        Rotation resultRotation = findDesiredRotation(originalSide, sideToRotateAround, originalRotatedSide, resultRotatedSide);
+        Rotation resultRotation = findDesiredRotation(originalSide, sideToRotateAround, originalRotatedSide,
+                resultRotatedSide);
 
         return rotationBlockFamily.getBlockForRotation(resultRotation);
     }
@@ -130,7 +123,6 @@ public class ScrewdriverSystem extends BaseComponentSystem {
      * Gets the corresponding side that should be rotated given a target side that should be rotated around.
      *
      * @param side the side the rotation is targetted around
-     *
      * @return The side that should be rotated given the side the rotation is targeted around
      */
     private SideMapping findSideMappingForSide(Side side) {
@@ -151,14 +143,13 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     }
 
     /**
-     * Finds the rotation that would rotate the given original side to the relative result side,
-     * and the original left side to its result side.
+     * Finds the rotation that would rotate the given original side to the relative result side, and the original left
+     * side to its result side.
      *
      * @param originalSide The pre-rotation side
      * @param relativeSide The post-rotation target for the originalSide
      * @param originalLeftSide The pre-rotation left side
      * @param resultSide The post-rotation target for the originalLeftSide
-     *
      * @return The rotation that transforms the given two original sides to the their respective resultant sides.
      */
     private Rotation findDesiredRotation(Side originalSide, Side relativeSide, Side originalLeftSide, Side resultSide) {
@@ -176,7 +167,6 @@ public class ScrewdriverSystem extends BaseComponentSystem {
      *
      * @param rotation The rotation that was applied to get the result side
      * @param resultSide The rotated resultant side
-     *
      * @return The original (pre-rotation) side for which the given rotation would have produced the result side.
      */
     private Side findOriginalSide(Rotation rotation, Side resultSide) {
