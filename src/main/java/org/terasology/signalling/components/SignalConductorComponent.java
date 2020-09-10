@@ -4,7 +4,7 @@ package org.terasology.signalling.components;
 
 import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.world.block.RequiresBlockLifecycleEvents;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.Set;
 
