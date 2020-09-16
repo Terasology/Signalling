@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.computer.module;
 
-import org.terasology.computer.component.ComputerComponent;
-import org.terasology.computer.component.ComputerModuleComponent;
-import org.terasology.computer.system.common.ComputerModuleRegistry;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
@@ -19,6 +16,9 @@ import org.terasology.inventory.logic.events.InventorySlotChangedEvent;
 import org.terasology.mobileBlocks.server.AfterBlockMovedEvent;
 import org.terasology.mobileBlocks.server.BeforeBlockMovesEvent;
 import org.terasology.mobileBlocks.server.BlockTransitionDuringMoveEvent;
+import org.terasology.modularcomputers.component.ComputerComponent;
+import org.terasology.modularcomputers.component.ComputerModuleComponent;
+import org.terasology.modularcomputers.system.common.ComputerModuleRegistry;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;

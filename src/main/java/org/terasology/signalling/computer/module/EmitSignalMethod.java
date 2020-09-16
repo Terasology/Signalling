@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.computer.module;
 
-import com.gempukku.lang.ExecutionException;
-import com.gempukku.lang.Variable;
-import org.terasology.computer.FunctionParamValidationUtil;
-import org.terasology.computer.context.ComputerCallback;
-import org.terasology.computer.module.ComputerDirection;
-import org.terasology.computer.system.server.lang.AbstractModuleMethodExecutable;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.math.Direction;
 import org.terasology.engine.math.SideBitFlag;
+import org.terasology.modularcomputers.FunctionParamValidationUtil;
+import org.terasology.modularcomputers.context.ComputerCallback;
+import org.terasology.modularcomputers.module.ComputerDirection;
+import org.terasology.modularcomputers.shadedlibs.com.gempukku.lang.ExecutionException;
+import org.terasology.modularcomputers.shadedlibs.com.gempukku.lang.Variable;
+import org.terasology.modularcomputers.system.server.lang.AbstractModuleMethodExecutable;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
 

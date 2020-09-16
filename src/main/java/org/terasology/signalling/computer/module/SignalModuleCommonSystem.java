@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.computer.module;
 
-import org.terasology.computer.system.common.ComputerModuleRegistry;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.config.ModuleConfigManager;
 import org.terasology.engine.registry.In;
+import org.terasology.modularcomputers.system.common.ComputerModuleRegistry;
 
 @RegisterSystem(RegisterMode.ALWAYS)
 public class SignalModuleCommonSystem extends BaseComponentSystem {
