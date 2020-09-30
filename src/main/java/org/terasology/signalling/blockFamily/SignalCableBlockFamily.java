@@ -15,13 +15,15 @@
  */
 package org.terasology.signalling.blockFamily;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.blockNetwork.BlockNetworkUtil;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Rotation;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.signalling.components.SignalConductorComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
@@ -34,8 +36,6 @@ import org.terasology.world.block.family.MultiConnectFamily;
 import org.terasology.world.block.family.RegisterBlockFamily;
 import org.terasology.world.block.loader.BlockFamilyDefinition;
 import org.terasology.world.block.shapes.BlockShape;
-
-import javax.print.attribute.standard.Sides;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -87,9 +87,14 @@ public class SignalCableBlockFamily extends MultiConnectFamily {
     }
 
     @Override
-    public boolean connectionCondition(Vector3i blockLocation, Side connectSide) {
+    public boolean connectionCondition(org.terasology.math.geom.Vector3i blockLocation, Side connectSide) {
+        return this.connectionCondition(JomlUtil.from(blockLocation), connectSide);
+    }
+
+    @Override
+    protected boolean connectionCondition(Vector3ic blockLocation, Side connectSide) {
         Vector3i neighborLocation = new Vector3i(blockLocation);
-        neighborLocation.add(connectSide.getVector3i());
+        neighborLocation.add(connectSide.direction());
 
         byte sourceConnection = BlockNetworkUtil.getSourceConnections(worldProvider.getBlock(blockLocation), SideBitFlag.getSide(connectSide));
 
