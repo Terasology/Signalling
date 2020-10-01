@@ -22,6 +22,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.blockNetwork.block.family.RotationBlockFamily;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Rotation;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Vector3i;
@@ -70,7 +71,7 @@ public class ScrewdriverSystem extends BaseComponentSystem {
     public void rotateGate(ActivateEvent event, EntityRef screwdriver) {
         final EntityRef target = event.getTarget();
         if (target.hasComponent(RotateableByScrewdriverComponent.class)) {
-            final Vector3i targetLocation = new Vector3i(event.getTargetLocation());
+            final Vector3i targetLocation = new Vector3i(JomlUtil.from(event.getTargetLocation()));
             final Block block = worldProvider.getBlock(targetLocation);
             final BlockFamily blockFamily = block.getBlockFamily();
             if (blockFamily instanceof SideDefinedBlockFamily) {
