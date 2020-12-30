@@ -39,6 +39,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.config.ModuleConfigManager;
 import org.terasology.logic.health.BeforeDestroyEvent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
@@ -477,7 +478,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     @ReceiveEvent()
     public void onBlockPlaced(OnBlockItemPlaced event, EntityRef entityRef) {
         EntityRef ref = event.getPlacedBlock();
-        final Vector3i location = event.getPosition();
+        final Vector3i location = JomlUtil.from(event.getPosition());
 
         if(ref.hasComponent(SignalConductorComponent.class)){
             logger.debug("SignalConductor placed: " + ref.getParentPrefab());
