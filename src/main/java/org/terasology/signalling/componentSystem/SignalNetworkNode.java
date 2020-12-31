@@ -15,6 +15,7 @@
  */
 package org.terasology.signalling.componentSystem;
 
+import org.joml.Vector3ic;
 import org.terasology.blockNetwork.NetworkNode;
 import org.terasology.math.geom.Vector3i;
 
@@ -28,7 +29,7 @@ public class SignalNetworkNode extends NetworkNode {
 
     private Type type;
 
-    public SignalNetworkNode(Vector3i location, byte inputSides, byte outputSides, Type type) {
+    public SignalNetworkNode(Vector3ic location, byte inputSides, byte outputSides, Type type) {
         super(location, inputSides, outputSides);
         this.type = type;
     }
