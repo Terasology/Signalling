@@ -1,16 +1,28 @@
 {
-    "id": "Signalling",
-    "version": "1.0.0",
-    "author": "Marcin Sciesinski <marcins78@gmail.com>",
-    "displayName": "Signalling framework",
-    "description": "Mod containing blocks that send signals to other blocks",
-    "dependencies": [
-        { "id": "BlockNetwork", "minVersion": "1.0.0" },
-        { "id": "Inventory", "minVersion": "1.1.0" },
-        { "id": "MobileBlocks", "minVersion": "1.0.0" },
-        { "id": "ModularComputers", "minVersion": "1.0.0" }
-    ],
-    "isServerSideOnly": false,
-    "isLibrary": true,
-    "isAsset": true
+  "id": "Signalling",
+  "version": "1.1.0-SNAPSHOT",
+  "author": "Marcin Sciesinski <marcins78@gmail.com>",
+  "displayName": "Signalling framework",
+  "description": "Mod containing blocks that send signals to other blocks",
+  "dependencies": [
+    {
+      "id": "BlockNetwork",
+      "minVersion": "1.0.0"
+    },
+    {
+      "id": "Inventory",
+      "minVersion": "1.1.0"
+    },
+    {
+      "id": "MobileBlocks",
+      "minVersion": "1.0.0"
+    },
+    {
+      "id": "ModularComputers",
+      "minVersion": "1.0.0"
+    }
+  ],
+  "isServerSideOnly": false,
+  "isLibrary": true,
+  "isAsset": true
 }
