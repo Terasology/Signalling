@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -198,13 +199,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
      * @return The consumers on the given network
      */
     private Iterable<SignalNetworkNode> getConsumersInNetwork(Network2<SignalNetworkNode> network) {
-        return Iterables.filter(network.getLeafNodes(),
-            new Predicate<SignalNetworkNode>() {
-                @Override
-                public boolean apply(@Nullable SignalNetworkNode input) {
-                    return input.getType() == SignalNetworkNode.Type.CONSUMER;
-                }
-            });
+        return network.getLeafNodes().stream()
+                .filter(input -> input.getType() == SignalNetworkNode.Type.CONSUMER)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -214,13 +211,9 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
      * @return The producers on the given network
      */
     private Iterable<SignalNetworkNode> getProducersInNetwork(Network2<SignalNetworkNode> network) {
-        return Iterables.filter(network.getLeafNodes(),
-            new Predicate<SignalNetworkNode>() {
-                @Override
-                public boolean apply(@Nullable SignalNetworkNode input) {
-                    return input.getType() == SignalNetworkNode.Type.PRODUCER;
-                }
-            });
+        return network.getLeafNodes().stream()
+                .filter(input -> input.getType() == SignalNetworkNode.Type.PRODUCER)
+                .collect(Collectors.toList());
     }
 
     /**

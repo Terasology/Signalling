@@ -361,7 +361,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
         Iterable<EntityRef> players = entityManager.getEntitiesWith(CharacterComponent.class, LocationComponent.class);
         for (EntityRef player : players) {
             Vector3f playerLocation = player.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
-            Vector3i locationBeneathPlayer = new Vector3i(new Vector3f(playerLocation.x + 0.5f, playerLocation.y - 0.5f, playerLocation.z + 0.5f), RoundingMode.FLOOR);
+            Vector3i locationBeneathPlayer = new Vector3i(playerLocation.add(0.5f, -0.5f, 0.5f), RoundingMode.FLOOR);
             Block blockBeneathPlayer = worldProvider.getBlock(locationBeneathPlayer);
             if (blockBeneathPlayer == signalPressurePlate) {
                 EntityRef entityBeneathPlayer = blockEntityRegistry.getBlockEntityAt(locationBeneathPlayer);
