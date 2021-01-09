@@ -20,6 +20,9 @@ import com.google.common.collect.Sets;
 import gnu.trove.iterator.TObjectLongIterator;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.blockNetwork.BlockNetworkUtil;
@@ -38,9 +41,6 @@ import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Side;
-import org.terasology.math.geom.ImmutableVector3i;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
@@ -100,7 +100,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     private Set<Vector3i> activatedPressurePlates = Sets.newHashSet();
 
-    private TObjectLongMap<ImmutableVector3i> gateLastSignalChangeTime = new TObjectLongHashMap<>();
+    private TObjectLongMap<Vector3i> gateLastSignalChangeTime = new TObjectLongHashMap<>();
 
     private long lastSignalCleanupExecuteTime;
 
@@ -139,7 +139,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             public void handleDelayedTrigger(String actionId, EntityRef entity) {
                 if (processOutputForNormalGate(entity)) {
                     BlockComponent block = entity.getComponent(BlockComponent.class);
-                    gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
+                    gateLastSignalChangeTime.put(block.getPosition(new Vector3i()), time.getGameTimeInMs());
                 }
             }
         };
@@ -159,7 +159,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForRevertedGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(block.getPosition(new Vector3i()), time.getGameTimeInMs());
                         }
                     }
                 });
@@ -201,7 +201,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
                     public void handleDelayedTrigger(String actionId, EntityRef entity) {
                         if (processOutputForSetResetGate(entity)) {
                             BlockComponent block = entity.getComponent(BlockComponent.class);
-                            gateLastSignalChangeTime.put(new ImmutableVector3i(block.getPosition()), time.getGameTimeInMs());
+                            gateLastSignalChangeTime.put(block.getPosition(new Vector3i()), time.getGameTimeInMs());
                         }
                     }
                 });
@@ -256,7 +256,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private void deleteOldSignalChangesForGates() {
         long worldTime = time.getGameTimeInMs();
         if (lastSignalCleanupExecuteTime + SIGNAL_CLEANUP_INTERVAL < worldTime) {
-            final TObjectLongIterator<ImmutableVector3i> iterator = gateLastSignalChangeTime.iterator();
+            final TObjectLongIterator<Vector3i> iterator = gateLastSignalChangeTime.iterator();
             while (iterator.hasNext()) {
                 iterator.advance();
                 if (iterator.value() + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL < worldTime) {
@@ -360,8 +360,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
         Iterable<EntityRef> players = entityManager.getEntitiesWith(CharacterComponent.class, LocationComponent.class);
         for (EntityRef player : players) {
-            Vector3f playerLocation = player.getComponent(LocationComponent.class).getWorldPosition();
-            Vector3i locationBeneathPlayer = new Vector3i(playerLocation.x + 0.5f, playerLocation.y - 0.5f, playerLocation.z + 0.5f);
+            Vector3f playerLocation = player.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+            Vector3i locationBeneathPlayer = new Vector3i(playerLocation.add(0.5f, -0.5f, 0.5f), RoundingMode.FLOOR);
             Block blockBeneathPlayer = worldProvider.getBlock(locationBeneathPlayer);
             if (blockBeneathPlayer == signalPressurePlate) {
                 EntityRef entityBeneathPlayer = blockEntityRegistry.getBlockEntityAt(locationBeneathPlayer);
@@ -423,7 +423,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     @ReceiveEvent(components = {BlockComponent.class, SignalProducerComponent.class})
     public void producerActivated(ActivateEvent event, EntityRef entity) {
         SignalProducerComponent producerComponent = entity.getComponent(SignalProducerComponent.class);
-        Vector3i blockLocation = new Vector3i(entity.getComponent(BlockComponent.class).getPosition());
+        Vector3i blockLocation = entity.getComponent(BlockComponent.class).getPosition(new Vector3i());
         Block blockAtLocation = worldProvider.getBlock(blockLocation);
         if (blockAtLocation == signalTransformer) {
             signalTransformerActivated(entity, producerComponent);
@@ -549,7 +549,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     public void consumerModified(OnChangedComponent event, EntityRef entity) {
         if (entity.hasComponent(BlockComponent.class)) {
             SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
-            Vector3i blockLocation = new Vector3i(entity.getComponent(BlockComponent.class).getPosition());
+            Vector3i blockLocation = entity.getComponent(BlockComponent.class).getPosition(new Vector3i());
             Block block = worldProvider.getBlock(blockLocation);
 
             SignalConsumerComponent signalConsumerComponent = entity.getComponent(SignalConsumerComponent.class);
@@ -609,7 +609,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
             // Schedule for the gate to be looked either immediately (during "update" method) or at least
             // GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL from the time it has last changed, whichever is later
             long delay;
-            final ImmutableVector3i location = new ImmutableVector3i(entity.getComponent(BlockComponent.class).getPosition());
+            final Vector3i location = entity.getComponent(BlockComponent.class).getPosition(new Vector3i());
             if (gateLastSignalChangeTime.containsKey(location)) {
                 delay = gateLastSignalChangeTime.get(location) + GATE_MINIMUM_SIGNAL_CHANGE_INTERVAL - time.getGameTimeInMs();
             } else {
