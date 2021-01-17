@@ -200,8 +200,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
      */
     private Iterable<SignalNetworkNode> getConsumersInNetwork(Network2<SignalNetworkNode> network) {
         return network.getLeafNodes().stream()
-                .filter(input -> input.getType() == SignalNetworkNode.Type.CONSUMER)
-                .collect(Collectors.toList());
+            .filter(input -> input.getType() == SignalNetworkNode.Type.CONSUMER)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -212,8 +212,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
      */
     private Iterable<SignalNetworkNode> getProducersInNetwork(Network2<SignalNetworkNode> network) {
         return network.getLeafNodes().stream()
-                .filter(input -> input.getType() == SignalNetworkNode.Type.PRODUCER)
-                .collect(Collectors.toList());
+            .filter(input -> input.getType() == SignalNetworkNode.Type.PRODUCER)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -543,8 +543,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         for (SignalConductorComponent.ConnectionGroup connectionGroup :
             blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
             Set<SignalNetworkNode> conductorNodes = Sets.newHashSet();
-            for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-                final SignalNetworkNode conductorNode = toNode(JomlUtil.from(location), connectionGroup.inputSides,
+            for (Vector3ic location : event) {
+                final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides,
                     connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
                 conductorNodes.add(conductorNode);
             }
@@ -558,8 +558,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
             blockType.getComponent(SignalConductorComponent.class).connectionGroups) {
             Set<SignalNetworkNode> conductorNodes = Sets.newHashSet();
             // Quite messy due to the order of operations, need to check if the order is important
-            for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-                final SignalNetworkNode conductorNode = toNode(JomlUtil.from(location), connectionGroup.inputSides,
+            for (Vector3ic location : event) {
+                final SignalNetworkNode conductorNode = toNode(location, connectionGroup.inputSides,
                     connectionGroup.outputSides, SignalNetworkNode.Type.CONDUCTOR);
                 conductorNodes.add(conductorNode);
             }
@@ -588,8 +588,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         final SignalProducerComponent producerComponent = blockType.getComponent(SignalProducerComponent.class);
         int signalStrength = producerComponent.signalStrength;
         Set<SignalNetworkNode> producerNodes = Sets.newHashSet();
-        for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-            final SignalNetworkNode producerNode = toNode(JomlUtil.from(location), 0,
+        for (Vector3ic location : event) {
+            final SignalNetworkNode producerNode = toNode(location, 0,
                 producerComponent.connectionSides, SignalNetworkNode.Type.PRODUCER);
 
             producerSignalStrengths.put(producerNode, signalStrength);
@@ -603,8 +603,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         byte connectingOnSides = blockType.getComponent(SignalProducerComponent.class).connectionSides;
         // Quite messy due to the order of operations, need to check if the order is important
         Set<SignalNetworkNode> producerNodes = Sets.newHashSet();
-        for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-            final SignalNetworkNode producerNode = toNode(JomlUtil.from(location), 0, connectingOnSides,
+        for (Vector3ic location : event) {
+            final SignalNetworkNode producerNode = toNode(location, 0, connectingOnSides,
                 SignalNetworkNode.Type.PRODUCER);
             producerNodes.add(producerNode);
         }
@@ -658,8 +658,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
     public void prefabConsumerLoaded(OnActivatedBlocks event, EntityRef blockType) {
         byte connectingOnSides = blockType.getComponent(SignalConsumerComponent.class).connectionSides;
         Set<SignalNetworkNode> consumerNodes = Sets.newHashSet();
-        for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-            SignalNetworkNode consumerNode = toNode(JomlUtil.from(location), connectingOnSides, 0,
+        for (Vector3ic location : event) {
+            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0,
                 SignalNetworkNode.Type.CONSUMER);
 
             consumerSignalInNetworks.put(consumerNode, Maps.newHashMap());
@@ -674,8 +674,8 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
         Set<SignalNetworkNode> consumerNodes = Sets.newHashSet();
 
         // Quite messy due to the order of operations, need to check if the order is important
-        for (org.terasology.math.geom.Vector3i location : event.getBlockPositions()) {
-            SignalNetworkNode consumerNode = toNode(JomlUtil.from(location), connectingOnSides, 0,
+        for (Vector3ic location : event) {
+            SignalNetworkNode consumerNode = toNode(location, connectingOnSides, 0,
                 SignalNetworkNode.Type.CONSUMER);
             consumerNodes.add(consumerNode);
         }
