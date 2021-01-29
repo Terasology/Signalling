@@ -16,10 +16,7 @@
 package org.terasology.signalling.components;
 
 import org.terasology.entitySystem.Component;
-import org.terasology.math.Side;
 import org.terasology.world.block.RequiresBlockLifecycleEvents;
-
-import java.util.Set;
 
 /**
  * Indicates that an Entity can recieve a Signal

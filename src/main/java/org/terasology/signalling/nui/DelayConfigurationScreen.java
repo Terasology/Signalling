@@ -3,12 +3,12 @@
 package org.terasology.signalling.nui;
 
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.nui.UIWidget;
 import org.terasology.nui.WidgetUtil;
 import org.terasology.nui.widgets.ActivateEventListener;
 import org.terasology.nui.widgets.UILabel;
 import org.terasology.nui.widgets.UIText;
+import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.signalling.components.SignalTimeDelayComponent;
 
 /**
