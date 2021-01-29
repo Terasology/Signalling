@@ -15,15 +15,9 @@
  */
 package org.terasology.signalling.componentSystem;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
@@ -42,7 +36,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.config.ModuleConfigManager;
 import org.terasology.logic.health.BeforeDestroyEvent;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
 import org.terasology.registry.In;
@@ -58,10 +51,12 @@ import org.terasology.world.block.BlockComponent;
 import org.terasology.world.block.OnActivatedBlocks;
 import org.terasology.world.block.items.OnBlockItemPlaced;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A system that manages networks of signal producers, conductors, and consumers.

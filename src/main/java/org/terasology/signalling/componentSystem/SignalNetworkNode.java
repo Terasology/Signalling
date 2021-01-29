@@ -17,7 +17,6 @@ package org.terasology.signalling.componentSystem;
 
 import org.joml.Vector3ic;
 import org.terasology.blockNetwork.NetworkNode;
-import org.terasology.math.geom.Vector3i;
 
 /**
  * Note that two nodes will be considered the same if their types are equal.
