@@ -87,11 +87,6 @@ public class SignalCableBlockFamily extends MultiConnectFamily {
     }
 
     @Override
-    public boolean connectionCondition(org.terasology.math.geom.Vector3i blockLocation, Side connectSide) {
-        return this.connectionCondition(JomlUtil.from(blockLocation), connectSide);
-    }
-
-    @Override
     protected boolean connectionCondition(Vector3ic blockLocation, Side connectSide) {
         Vector3i neighborLocation = new Vector3i(blockLocation);
         neighborLocation.add(connectSide.direction());
