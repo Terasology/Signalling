@@ -100,7 +100,7 @@ public class SignalCableBlockFamily extends MultiConnectFamily {
     private boolean connectsToNeighbor(Side connectSide, boolean input, boolean output, EntityRef neighborEntity) {
         final Side oppositeDirection = connectSide.reverse();
 
-        Block block = neighborEntity.getComponent(BlockComponent.class).block;
+        Block block = neighborEntity.getComponent(BlockComponent.class).getBlock();
 
         final SignalConductorComponent neighborConductorComponent = neighborEntity.getComponent(SignalConductorComponent.class);
         if (neighborConductorComponent != null) {

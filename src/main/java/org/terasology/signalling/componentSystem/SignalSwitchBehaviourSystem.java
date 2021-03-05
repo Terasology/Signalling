@@ -303,7 +303,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
     private boolean processOutputForSetResetGate(EntityRef blockEntity) {
         SignalGateComponent signalGateComponent = blockEntity.getComponent(SignalGateComponent.class);
         SignalConsumerAdvancedStatusComponent consumerAdvancedStatusComponent = blockEntity.getComponent(SignalConsumerAdvancedStatusComponent.class);
-        Block block = blockEntity.getComponent(BlockComponent.class).block;
+        Block block = blockEntity.getComponent(BlockComponent.class).getBlock();
         Side resetSide = signalGateComponent.functionalSides.get(0);
         Integer resetSignal = consumerAdvancedStatusComponent.signalStrengths.get(BlockNetworkUtil.getResultSide(block, resetSide).name());
 
