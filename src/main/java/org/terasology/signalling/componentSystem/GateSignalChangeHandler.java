@@ -15,7 +15,7 @@
  */
 package org.terasology.signalling.componentSystem;
 
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
 
 /**
  * A callback that is notified when an {@link EntityRef}'s state changes.

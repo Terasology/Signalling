@@ -5,23 +5,23 @@ package org.terasology.signalling.blockFamily;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.blockNetwork.BlockNetworkUtil;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.math.Rotation;
-import org.terasology.math.Side;
-import org.terasology.math.SideBitFlag;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.math.Rotation;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.math.SideBitFlag;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockBuilderHelper;
+import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.block.family.BlockSections;
+import org.terasology.engine.world.block.family.MultiConnectFamily;
+import org.terasology.engine.world.block.family.RegisterBlockFamily;
+import org.terasology.engine.world.block.loader.BlockFamilyDefinition;
+import org.terasology.engine.world.block.shapes.BlockShape;
 import org.terasology.signalling.components.SignalConductorComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockBuilderHelper;
-import org.terasology.world.block.BlockComponent;
-import org.terasology.world.block.BlockUri;
-import org.terasology.world.block.family.BlockSections;
-import org.terasology.world.block.family.MultiConnectFamily;
-import org.terasology.world.block.family.RegisterBlockFamily;
-import org.terasology.world.block.loader.BlockFamilyDefinition;
-import org.terasology.world.block.shapes.BlockShape;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

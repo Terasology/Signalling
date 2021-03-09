@@ -15,7 +15,7 @@
  */
 package org.terasology.signalling.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 /**
  * Keeps track of whether or not the entity is recieving a signal.

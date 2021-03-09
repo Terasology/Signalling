@@ -21,9 +21,9 @@ import org.terasology.computer.FunctionParamValidationUtil;
 import org.terasology.computer.context.ComputerCallback;
 import org.terasology.computer.module.ComputerDirection;
 import org.terasology.computer.system.server.lang.AbstractModuleMethodExecutable;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.Direction;
-import org.terasology.math.SideBitFlag;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.math.Direction;
+import org.terasology.engine.math.SideBitFlag;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
 

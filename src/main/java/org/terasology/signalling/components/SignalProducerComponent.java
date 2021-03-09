@@ -15,8 +15,8 @@
  */
 package org.terasology.signalling.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.RequiresBlockLifecycleEvents;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.RequiresBlockLifecycleEvents;
 /**
  * The component that is added to an entity to allow it to produce a signal.
  * The connection sides are the sides that the signal can flow through.

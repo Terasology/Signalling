@@ -15,9 +15,9 @@
  */
 package org.terasology.signalling.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.RequiresBlockLifecycleEvents;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.RequiresBlockLifecycleEvents;
 
 import java.util.Set;
 

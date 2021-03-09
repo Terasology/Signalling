@@ -15,8 +15,8 @@
  */
 package org.terasology.signalling.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.ForceBlockActive;
 
 /**
  * Responsible for keeping track of whether a TimeDelay in a Signal has been modified.

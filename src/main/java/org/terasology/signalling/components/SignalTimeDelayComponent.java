@@ -15,7 +15,7 @@
  */
 package org.terasology.signalling.components;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 /**
  * Responsible for keeping track of the time delay in a signal
  */

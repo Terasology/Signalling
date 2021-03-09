@@ -16,8 +16,8 @@
 package org.terasology.signalling.components;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.Component;
-import org.terasology.math.Side;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.math.Side;
 
 import java.util.List;
 

@@ -15,8 +15,8 @@
  */
 package org.terasology.signalling.nui;
 
-import org.terasology.network.NetworkEvent;
-import org.terasology.network.ServerEvent;
+import org.terasology.engine.network.NetworkEvent;
+import org.terasology.engine.network.ServerEvent;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
