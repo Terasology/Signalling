@@ -1,33 +1,28 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.components;
 
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.world.block.RequiresBlockLifecycleEvents;
+import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A component that indicates the {@link EntityRef} it is attached to is a signal conductor.
  * Holds information about conductor's input / output sides.
  */
 @RequiresBlockLifecycleEvents
-public class SignalConductorComponent implements Component {
+public class SignalConductorComponent implements Component<SignalConductorComponent> {
     public Set<ConnectionGroup> connectionGroups;
+
+    @Override
+    public void copy(SignalConductorComponent other) {
+        this.connectionGroups = other.connectionGroups.stream()
+                .map(ConnectionGroup::copy)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Maps a signal conductor entity's input / output sides.
@@ -36,5 +31,12 @@ public class SignalConductorComponent implements Component {
     public static class ConnectionGroup {
         public byte inputSides;
         public byte outputSides;
+
+        ConnectionGroup copy() {
+            ConnectionGroup newCG = new ConnectionGroup();
+            newCG.inputSides = this.inputSides;
+            newCG.outputSides = this.outputSides;
+            return newCG;
+        }
     }
 }
