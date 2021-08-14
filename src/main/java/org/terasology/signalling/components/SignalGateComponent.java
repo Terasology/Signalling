@@ -18,7 +18,7 @@ public class SignalGateComponent implements Component<SignalGateComponent> {
     public List<Side> functionalSides = Lists.newArrayList();
 
     @Override
-    public void copy(SignalGateComponent other) {
+    public void copyFrom(SignalGateComponent other) {
         this.gateType = other.gateType;
         this.functionalSides = Lists.newArrayList(other.functionalSides);
     }

@@ -16,7 +16,7 @@ public class SignalConsumerComponent implements Component<SignalConsumerComponen
     public SignalConsumerComponent.Mode mode = Mode.AT_LEAST_ONE;
 
     @Override
-    public void copy(SignalConsumerComponent other) {
+    public void copyFrom(SignalConsumerComponent other) {
         this.connectionSides = other.connectionSides;
         this.mode = other.mode;
     }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.components;
 
+import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.world.block.RequiresBlockLifecycleEvents;
 import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
@@ -18,7 +19,7 @@ public class SignalConductorComponent implements Component<SignalConductorCompon
     public Set<ConnectionGroup> connectionGroups;
 
     @Override
-    public void copy(SignalConductorComponent other) {
+    public void copyFrom(SignalConductorComponent other) {
         this.connectionGroups = other.connectionGroups.stream()
                 .map(ConnectionGroup::copy)
                 .collect(Collectors.toSet());

@@ -11,7 +11,7 @@ public class SignalConsumerStatusComponent implements Component<SignalConsumerSt
     public boolean hasSignal;
 
     @Override
-    public void copy(SignalConsumerStatusComponent other) {
+    public void copyFrom(SignalConsumerStatusComponent other) {
         this.hasSignal = other.hasSignal;
     }
 }

@@ -16,7 +16,7 @@ public class SignalProducerComponent implements Component<SignalProducerComponen
     public int signalStrength;
 
     @Override
-    public void copy(SignalProducerComponent other) {
+    public void copyFrom(SignalProducerComponent other) {
         this.connectionSides = other.connectionSides;
         this.signalStrength = other.signalStrength;
     }

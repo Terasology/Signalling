@@ -20,7 +20,7 @@ public class SignalConsumerAdvancedStatusComponent implements Component<SignalCo
     public Map<String, Integer> signalStrengths = new HashMap<>();
 
     @Override
-    public void copy(SignalConsumerAdvancedStatusComponent other) {
+    public void copyFrom(SignalConsumerAdvancedStatusComponent other) {
         this.signalStrengths = Maps.newHashMap(other.signalStrengths);
     }
 }

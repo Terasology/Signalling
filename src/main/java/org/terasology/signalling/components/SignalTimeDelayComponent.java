@@ -11,7 +11,7 @@ public class SignalTimeDelayComponent implements Component<SignalTimeDelayCompon
     public long delaySetting;
 
     @Override
-    public void copy(SignalTimeDelayComponent other) {
+    public void copyFrom(SignalTimeDelayComponent other) {
         this.delaySetting = other.delaySetting;
     }
 }
