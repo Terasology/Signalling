@@ -490,7 +490,7 @@ public class SignalSystem extends BaseComponentSystem implements UpdateSubscribe
      * @param event The event triggered by block placement
      * @param entityRef The entity information of the placed block
      */
-    @ReceiveEvent()
+    @ReceiveEvent
     public void onBlockPlaced(OnBlockItemPlaced event, EntityRef entityRef) {
         EntityRef ref = event.getPlacedBlock();
         final Vector3ic location = event.getPosition();

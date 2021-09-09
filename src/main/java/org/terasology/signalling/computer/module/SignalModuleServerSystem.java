@@ -21,17 +21,18 @@ import org.terasology.computer.system.common.ComputerModuleRegistry;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.module.inventory.systems.InventoryManager;
-import org.terasology.module.inventory.events.InventorySlotChangedEvent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.BlockEntityRegistry;
 import org.terasology.mobileBlocks.server.AfterBlockMovedEvent;
 import org.terasology.mobileBlocks.server.BeforeBlockMovesEvent;
 import org.terasology.mobileBlocks.server.BlockTransitionDuringMoveEvent;
+import org.terasology.module.inventory.events.InventorySlotChangedEvent;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.signalling.components.SignalConsumerAdvancedStatusComponent;
 import org.terasology.signalling.components.SignalConsumerComponent;
 import org.terasology.signalling.components.SignalProducerComponent;
@@ -84,7 +85,8 @@ public class SignalModuleServerSystem extends BaseComponentSystem {
         computerIsMoving = false;
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_TRIVIAL)
+    @Priority(EventPriority.PRIORITY_TRIVIAL)
+    @ReceiveEvent
     public void computerMovedCopyProduceSettings(BlockTransitionDuringMoveEvent event, EntityRef entity, SignalProducerComponent producer, SignalConsumerComponent consumer) {
         EntityRef newEntity = event.getIntoEntity();
 
