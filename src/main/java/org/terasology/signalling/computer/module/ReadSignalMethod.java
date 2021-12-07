@@ -1,18 +1,5 @@
-/*
- * Copyright 2015 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.signalling.computer.module;
 
 import com.gempukku.lang.ExecutionException;
@@ -41,7 +28,9 @@ public class ReadSignalMethod extends AbstractModuleMethodExecutable<Object> {
     private String methodName;
 
     public ReadSignalMethod(String methodName) {
-        super("Reads signal from the specified side.<l>Note, that you cannot read a signal from a side that this computer is emitting signal on.", "Number", "Signal strength on that side: 0 means no signal on that side, -1 means infinite.");
+        super("Reads signal from the specified side.<l>Note, that you cannot read a signal from a side " +
+                "that this computer is emitting signal on.", "Number",
+                "Signal strength on that side: 0 means no signal on that side, -1 means infinite.");
         this.methodName = methodName;
 
         addParameter("direction", "Direction", "Direction from which to read the signal.");
@@ -53,10 +42,12 @@ public class ReadSignalMethod extends AbstractModuleMethodExecutable<Object> {
     }
 
     @Override
-    public Object onFunctionEnd(int line, ComputerCallback computer, Map<String, Variable> parameters, Object onFunctionStartResult) throws ExecutionException {
+    public Object onFunctionEnd(int line, ComputerCallback computer, Map<String, Variable> parameters, Object onFunctionStartResult)
+            throws ExecutionException {
         Direction direction = FunctionParamValidationUtil.validateDirectionParameter(line, parameters, "direction", methodName);
 
-        SignalConsumerAdvancedStatusComponent component = computer.getComputerEntity().getComponent(SignalConsumerAdvancedStatusComponent.class);
+        SignalConsumerAdvancedStatusComponent component = computer.getComputerEntity()
+                .getComponent(SignalConsumerAdvancedStatusComponent.class);
         Integer strength = component.signalStrengths.get(direction.toSide().name());
         if (strength == null) {
             return 0;
