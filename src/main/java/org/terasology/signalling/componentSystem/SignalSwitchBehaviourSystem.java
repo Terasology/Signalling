@@ -50,8 +50,6 @@ import java.util.Set;
 
 /**
  * The system that manages switches and dictates their behaviour.
- *
- * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements UpdateSubscriberSystem {
@@ -103,7 +101,8 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
 
     /**
      * Prepares signalling related blocks and SignalChangeHandlers for later event handling.
-     * These are obtained from an instance of {@link org.terasology.engine.world.block.BlockManager} and by implementing {@link GateSignalChangeHandler}, respectively.
+     * These are obtained from an instance of {@link org.terasology.engine.world.block.BlockManager}
+     * and by implementing {@link GateSignalChangeHandler}, respectively.
      */
     @Override
     public void initialise() {
@@ -517,7 +516,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
      * @param signalGate The SignalGate Component, used to determine the action performed.
      * @param block
      */
-    @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
+    @ReceiveEvent(components = SignalConsumerStatusComponent.class)
     public void gateConsumerModified(OnChangedComponent event, EntityRef entity, SignalGateComponent signalGate, BlockComponent block) {
         String gateType = signalGate.gateType;
         GateSignalChangeHandler gateSignalChangeHandler = signalChangeHandlers.get(gateType);
@@ -532,7 +531,7 @@ public class SignalSwitchBehaviourSystem extends BaseComponentSystem implements 
      * @param event The event modifying the consumer.
      * @param entity The consumer to be updated.
      */
-    @ReceiveEvent(components = {SignalConsumerStatusComponent.class})
+    @ReceiveEvent(components = SignalConsumerStatusComponent.class)
     public void consumerModified(OnChangedComponent event, EntityRef entity) {
         if (entity.hasComponent(BlockComponent.class)) {
             SignalConsumerStatusComponent consumerStatusComponent = entity.getComponent(SignalConsumerStatusComponent.class);
